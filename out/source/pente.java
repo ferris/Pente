@@ -12,9 +12,37 @@ import java.io.InputStream;
 import java.io.OutputStream; 
 import java.io.IOException; 
 
-public class pente extends PApplet {
+public class Pente extends PApplet {
 
-String version = "Alpha 1.0.1";
+/*
+ _______                        __               
+/       \                      /  |              
+$$$$$$$  | ______   _______   _$$ |_     ______  
+$$ |__$$ |/      \ /       \ / $$   |   /      \ 
+$$    $$//$$$$$$  |$$$$$$$  |$$$$$$/   /$$$$$$  |
+$$$$$$$/ $$    $$ |$$ |  $$ |  $$ | __ $$    $$ |
+$$ |     $$$$$$$$/ $$ |  $$ |  $$ |/  |$$$$$$$$/ 
+$$ |     $$       |$$ |  $$ |  $$  $$/ $$       |
+$$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
+
+*/
+
+/*
+  Pente Development Code
+ Written by Ferris Linde
+ Last updated 2019/01/16
+*/
+
+// SAVE NOTES:
+/*
+  • Everything is now  " a e s t h e t i c "
+  • We could optimize the framework for when every piece is drawn, not every frame.
+  • Now it's time to get online multiplayer working.
+  • Then we can move on and try to get the impossible computer working.
+  • After that we can make a percentage of impossible usage and minimax scoring in order to change the difficulty
+*/
+
+String version = "Alpha 2.0.0";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;
@@ -399,7 +427,7 @@ public void singleMenu() {
 
   public void settings() {  size(800, 600); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "pente" };
+    String[] appletArgs = new String[] { "Pente" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

@@ -77,6 +77,10 @@ public void draw() {
 public void mouseClicked() {
   mouseReleased = true;
 }
+
+class AlphaBeta {
+    int[] prevMove;
+}
 class Game {
   int pieces[][] = new int[19][19];
   private int order[][] = new int[19][19];

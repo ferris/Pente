@@ -1,11 +1,12 @@
 class Game {
-  int pieces[][] = new int[19][19];
-  private int order[][] = new int[19][19];
-  int turnCount = 0;
-  int turn;
-  int winner = 0;
-  String mode;
-  boolean winDelay = false;
+  int n = 19; // size of board
+  int pieces[][] = new int[n][n]; // board
+  int oCaptures = 0; // captures by player 1
+  int tCaptures = 0; // captures by player 2
+  int turn; // current turn
+  int winner = 0; // the winner
+  String mode; // game mode chosen through menu
+  boolean winDelay = false; // prevents accidental return to menu
 
   public Game(String mode, int startingPlayer) {
     this.mode = mode;
@@ -14,92 +15,164 @@ class Game {
 
 
   // BACK END METHODS
-  public void capture() {
-    //rows
-    for (int r = 0; r < pieces.length -3; ++r) {
-      for (int c = 0; c < pieces[r].length - 3; ++c) {
-        if (captureHelper(pieces[r][c], pieces[r][c+1], pieces[r][c+2], pieces[r][c+3])) {
-          pieces[r][c+1] = 0;
-          pieces[r][c+2] = 0;
-        }
-      }
+  public int isCaptureMove(int[][] board, int movePlayer, int[] move) {
+    // checks if capture move and returns number of captures for tallying
+    int cCount = 0;
+
+    int unPlayer;
+    if (movePlayer == 1) {
+      unPlayer = 2;
+    } else {
+      unPlayer = 1;
     }
-    // columns
-    for (int r = 0; r < pieces.length -3; ++r) {
-      for (int c = 0; c < pieces[r].length - 3; ++c) {
-        if (captureHelper(pieces[r][c], pieces[r+1][c], pieces[r+2][c], pieces[r+3][c])) {
-          pieces[r+1][c] = 0;
-          pieces[r+2][c] = 0;
-        }
-      }
+
+    // check horizontal captures (-)
+    if (move[1] > 2 &&
+        board[move[0]][move[1]-1] == unPlayer &&
+        board[move[0]][move[1]-2] == unPlayer &&
+        board[move[0]][move[1]-3] == movePlayer) {
+      board[move[0]][move[1]-1] = 0;
+      board[move[0]][move[1]-2] = 0;
+      cCount++;
     }
-    // down diagnol
-    for (int r = 0; r < pieces.length -3; ++r) {
-      for (int c = 0; c < pieces.length -3; ++c) {
-        if (captureHelper(pieces[r][c], pieces[r+1][c+1], pieces[r+2][c+2], pieces[r+3][c+3])) {
-          pieces[r+1][c+1] = 0;
-          pieces[r+2][c+2] = 0;
-        }
-      }
+
+    if (move[1] < n-3 &&
+        board[move[0]][move[1]+1] == unPlayer &&
+        board[move[0]][move[1]+2] == unPlayer &&
+        board[move[0]][move[1]+3] == movePlayer) {
+      board[move[0]][move[1]+1] = 0;
+      board[move[0]][move[1]+2] = 0;
+      cCount++;
     }
-    // up diagnol
-    for (int r = 3; r < pieces.length; ++r) {
-      for (int c = 0; c < pieces.length -3; ++c) {
-        if (captureHelper(pieces[r][c], pieces[r-1][c+1], pieces[r-2][c+2], pieces[r-3][c+3])) {
-          pieces[r-1][c+1] = 0;
-          pieces[r-2][c+2] = 0;
-        }
-      }
+
+    // check vertical captures (|)
+    if (move[0] > 2 &&
+        board[move[0]-1][move[1]] == unPlayer &&
+        board[move[0]-2][move[1]] == unPlayer &&
+        board[move[0]-3][move[1]] == movePlayer) {
+      board[move[0]-1][move[1]] = 0;
+      board[move[0]-2][move[1]] = 0;
+      cCount++;
     }
+
+    if (move[0] < n-3 &&
+        board[move[0]+1][move[1]] == unPlayer &&
+        board[move[0]+2][move[1]] == unPlayer &&
+        board[move[0]+3][move[1]] == movePlayer) {
+      board[move[0]+1][move[1]] = 0;
+      board[move[0]+2][move[1]] = 0;
+      cCount++;
+    }
+
+    // check diagonal captures (\)
+    if (move[0] > 2 && move[1] > 2 &&
+        board[move[0]-1][move[1]-1] == unPlayer &&
+        board[move[0]-2][move[1]-2] == unPlayer &&
+        board[move[0]-3][move[1]-3] == movePlayer) {
+      board[move[0]-1][move[1]-1] = 0;
+      board[move[0]-2][move[1]-2] = 0;
+      cCount++;
+    }
+
+    if (move[0] < n-3 && move[1] < n-3 &&
+        board[move[0]+1][move[1]+1] == unPlayer &&
+        board[move[0]+2][move[1]+2] == unPlayer &&
+        board[move[0]+3][move[1]+3] == movePlayer) {
+      board[move[0]+1][move[1]+1] = 0;
+      board[move[0]+2][move[1]+2] = 0;
+      cCount++;
+    }
+
+    // check other diagonal captures (/)
+    if (move[0] > 2 && move[1] < n-3 &&
+        board[move[0]-1][move[1]+1] == unPlayer &&
+        board[move[0]-2][move[1]+2] == unPlayer &&
+        board[move[0]-3][move[1]+3] == movePlayer) {
+      board[move[0]-1][move[1]+1] = 0;
+      board[move[0]-2][move[1]+2] = 0;
+      cCount++;
+    }
+
+    if (move[0] < n-3 && move[1] > 2 &&
+        board[move[0]+1][move[1]-1] == unPlayer &&
+        board[move[0]+2][move[1]-2] == unPlayer &&
+        board[move[0]+3][move[1]-3] == movePlayer) {
+      board[move[0]+1][move[1]-1] = 0;
+      board[move[0]+2][move[1]-2] = 0;
+      cCount++;
+    }
+
+    return cCount;
   }
+
+
+  public boolean isValidMove(int[][] board, int[] move) {
+    if (move[0] >= 0 && move[0] < n && move[1] >= 0 && move[1] < n) {
+      return (board[move[0]][move[1]] == 0);
+    }
+    return false;
+  }
+
 
   public void turnGeneration() {
     if (mode.equals("local")) {
-      humanMoveCheck();
-    }
-  }
-
-  public void placeMarble(int r, int c) {
-    if (spotFree(r, c)) {
-      turnCount++;
-      order[r][c] = turnCount;
-      pieces[r][c] = turn;
-      if (turn == 1) {
-        turn = 2;
-      } else if (turn == 2) {
-        turn = 1;
+      int[] hmc = humanMoveCheck();
+      int[] move = {hmc[1], hmc[2]};
+      if (hmc[0] == 1 && isValidMove(pieces, move)) {
+        // a valid move has been played by the human
+        int captures = isCaptureMove(pieces, turn, move);
+        pieces[hmc[1]][hmc[2]] = turn;
+        if (captures != 0) {
+          if (turn == 1) {
+            oCaptures++;
+          } else {
+            tCaptures++;
+          }
+        }
+        if (turn == 1) {
+          turn = 2;
+        } else if (turn == 2) {
+          turn = 1;
+        }
       }
     }
   }
 
+
   int winCheck() {
+    // five captures check
+    if (oCaptures >= 5) {
+      return 1;
+    } else if (tCaptures >= 5) {
+      return 2;
+    }
     // row check
-    for (int r = 0; r < pieces.length - 4; ++r) {
-      for (int c = 0; c < pieces[r].length; ++c) {
+    for (int r = 0; r < n - 4; ++r) {
+      for (int c = 0; c < n; ++c) {
         if (winHelper(pieces[r][c],pieces[r+1][c],pieces[r+2][c],pieces[r+3][c],pieces[r+4][c])) {
           return pieces[r][c];
         }
       }
     }
     // column check
-    for (int r = 0; r < pieces.length; ++r) {
-      for (int c = 0; c < pieces[r].length - 4; ++c) {
+    for (int r = 0; r < n; ++r) {
+      for (int c = 0; c < n - 4; ++c) {
         if (winHelper(pieces[r][c],pieces[r][c+1],pieces[r][c+2],pieces[r][c+3],pieces[r][c+4])) {
           return pieces[r][c];
         }
       }
     }
     // down diagonal
-    for (int r = 0; r < pieces.length - 4; ++r) {
-      for (int c = 0; c < pieces[r].length - 4; ++c) {
+    for (int r = 0; r < n - 4; ++r) {
+      for (int c = 0; c < n - 4; ++c) {
         if (winHelper(pieces[r][c],pieces[r+1][c+1],pieces[r+2][c+2],pieces[r+3][c+3],pieces[r+4][c+4])) {
           return pieces[r][c];
         }
       }
     }
     // up diagonal
-    for (int r = 4; r < pieces.length; ++r) {
-      for (int c = 0; c < pieces[r].length - 4; ++c) {
+    for (int r = 4; r < n; ++r) {
+      for (int c = 0; c < n - 4; ++c) {
         if (winHelper(pieces[r][c],pieces[r-1][c+1],pieces[r-2][c+2],pieces[r-3][c+3],pieces[r-4][c+4])) {
           return pieces[r][c];
         }
@@ -149,8 +222,8 @@ class Game {
   }
 
   public void drawPieces() {
-    for (int i = 0; i < pieces.length; ++i) {
-      for (int j = 0; j < pieces[i].length; ++j) {
+    for (int i = 0; i < n; ++i) {
+      for (int j = 0; j < n; ++j) {
         if (pieces[i][j] == 1) {
           strokeWeight(2);
           stroke(10, 120, 140);
@@ -226,13 +299,6 @@ class Game {
 
   
   // PRIVATE HELPERS
-  private boolean captureHelper(int c1, int c2, int c3, int c4) {
-    return c1 != 0 && c1 == c4 && c2 == c3 && c1 != c2;
-  }
-
-  private boolean spotFree(int r, int c) {
-    return pieces[r][c] == 0 && winner == 0;
-  }
 
   private boolean winHelper(int c1, int c2, int c3, int c4, int c5) {
     return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;

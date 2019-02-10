@@ -13,20 +13,10 @@ $$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
 
 /*
   Pente Development Code
- Written by Ferris Linde
- Last updated 2019/01/16
+  Written by Ferris Linde
 */
 
-// SAVE NOTES:
-/*
-  • Everything is now  " a e s t h e t i c "
-  • We could optimize the framework for when every piece is drawn, not every frame.
-  • Now it's time to get online multiplayer working.
-  • Then we can move on and try to get the impossible computer working.
-  • After that we can make a percentage of impossible usage and minimax scoring in order to change the difficulty
-*/
-
-String version = "Alpha 2.0.0";
+String version = "Alpha 2.0.1";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;

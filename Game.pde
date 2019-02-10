@@ -1,12 +1,12 @@
 class Game {
-  int n = 19; // size of board
-  int pieces[][] = new int[n][n]; // board
-  int oCaptures = 0; // captures by player 1
-  int tCaptures = 0; // captures by player 2
-  int turn; // current turn
-  int winner = 0; // the winner
-  String mode; // game mode chosen through menu
-  boolean winDelay = false; // prevents accidental return to menu
+  public static final int n = 19; // size of board
+  private int pieces[][] = new int[n][n]; // board
+  private int oCaptures = 0; // captures by player 1
+  private int tCaptures = 0; // captures by player 2
+  private int turn; // current turn
+  private int winner = 0; // the winner
+  private String mode; // game mode chosen through menu
+  private boolean winDelay = false; // prevents accidental return to menu
 
   public Game(String mode, int startingPlayer) {
     this.mode = mode;

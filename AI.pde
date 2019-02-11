@@ -80,9 +80,16 @@ class GameAI {
     int beginTime = millis();
     int[] fakeMove = {-1, -1};
     ABTree tree = new ABTree(board, fakeMove);
-    ABObj m = minValue(tree.root, depth, player, new ABObj(Integer.MIN_VALUE, fakeMove), new ABObj(Integer.MAX_VALUE, fakeMove));
+    ABObj m = minValue(
+      tree.root, // node
+      depth, // depth
+      player, // player
+      new ABObj(Integer.MIN_VALUE, fakeMove), // alpha
+      new ABObj(Integer.MAX_VALUE, fakeMove) // beta
+    );
     int timeTaken = millis() - beginTime;
-    println("Processing time: " + timeTaken);
+    println("Processing time: " + timeTaken + "ms");
+    println("value: " + m.value);
     return m.move;
   }
   
@@ -108,9 +115,10 @@ class GameAI {
       ABObj m = maxValue(node.children.get(i), depth-1, unplayer, alpha, beta);
       if (m.value < beta.value) {
         if (node.parent == null) {
-          beta = m; // return both value and move if root
+          beta = m; // return both child value and child move if root
         } else {
           beta.value = m.value;
+          beta.move = node.move.clone();
         }
       }
       if (alpha.value >= beta.value) {
@@ -141,12 +149,9 @@ class GameAI {
     for (int i = 0; i < node.children.size(); ++i) {
       ABObj m = minValue(node.children.get(i), depth-1, unplayer, alpha, beta);
       if (m.value > alpha.value) {
-        // if (node.parent.parent == null) {
-        //   beta = m;
-        // } else {
-        //   beta.value 
-        // }
-        alpha.value = m.value; // TODO: FIGURE OUT IF IT'S VALUE OR THE OBJ??s
+        print("l" + depth + " pv" + m.value);
+        alpha.value = m.value;
+        alpha.move = node.move.clone();
       }
       if (alpha.value >= beta.value) {
         break;
@@ -159,6 +164,7 @@ class GameAI {
   int heuristic(int[][] board) {
     // this is a super dumb heuristic
     // all it does is see how many tiles are on the board
+    // computer tiles - human tiles
     int tileCount = 0;
     int unTileCount = 0;
 

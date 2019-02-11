@@ -26,6 +26,11 @@ class Game {
       unPlayer = 1;
     }
 
+    // exception for AI fakeMove
+    if (move[0] == -1 && move[1] == -1) {
+      return 0;
+    }
+
     // check horizontal captures (-)
     if (move[1] > 2 &&
         board[move[0]][move[1]-1] == unPlayer &&
@@ -128,8 +133,8 @@ class Game {
       } else {
         println("computer is thinking");
         GameAI ai = new GameAI();
-        move = ai.alphaBeta(pieces, 2, turn);
-        print("( ");print(move[0]);print(", ");println(move[1]);print(" )");
+        move = ai.alphaBeta(pieces, 1, turn);
+        print("( ");print(move[0]);print(", ");print(move[1]);println(" )");
         newMove = true;
       }
     }

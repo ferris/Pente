@@ -77,7 +77,8 @@ void singleMenu() {
   // BUTTONS
   // easy button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    game = new Game("single", int(random(1, 3)));
+    //game = new Game("single", int(random(1, 3)));
+    game = new Game("single", 2);
     room = "game";
   }
   // medium button

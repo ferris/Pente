@@ -16,7 +16,7 @@ $$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
   Written by Ferris Linde
 */
 
-String version = "Alpha 2.0.1";
+String version = "Alpha 2.1.0";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;

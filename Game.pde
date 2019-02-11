@@ -131,11 +131,14 @@ class Game {
         move = new int[] {hmc[1], hmc[2]};
         newMove = hmc[0] == 1;
       } else {
+        println();
         println("computer is thinking");
         GameAI ai = new GameAI();
-        move = ai.alphaBeta(pieces, 1, turn);
+        move = ai.getComputerMove(pieces, 2, turn);
         print("( ");print(move[0]);print(", ");print(move[1]);println(" )");
         newMove = true;
+        ai = null;
+        System.gc();
       }
     }
     if (newMove && isValidMove(pieces, move)) {

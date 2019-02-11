@@ -20,6 +20,7 @@ class ABTree {
 }
 
 class ABNode {
+  private int value;
   private int[][] board;
   private int[] move;
   private int captures;
@@ -76,89 +77,119 @@ class GameAI {
   private int oCaptures = 0;
   private int tCaptures = 0;
 
-  public int[] alphaBeta(int[][] board, int depth, int player) {
+  public int[] getComputerMove(int[][] board, int depth, int player) {
     int beginTime = millis();
-    int[] fakeMove = {-1, -1};
-    ABTree tree = new ABTree(board, fakeMove);
-    ABObj m = minValue(
-      tree.root, // node
-      depth, // depth
-      player, // player
-      new ABObj(Integer.MIN_VALUE, fakeMove), // alpha
-      new ABObj(Integer.MAX_VALUE, fakeMove) // beta
-    );
+    ABTree tree = new ABTree(board, new int[] {-1, -1});
+    int value = alphabeta(tree.root, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, player);
+    List<ABNode> suitableMoves = new ArrayList<ABNode>();
+    for (ABNode child : tree.root.children) {
+      if (child.value == value) {
+        suitableMoves.add(child);
+      }
+    }
     int timeTaken = millis() - beginTime;
     println("Processing time: " + timeTaken + "ms");
-    println("value: " + m.value);
-    return m.move;
-  }
-  
-  ABObj minValue(ABNode node, int depth, int player, ABObj alpha, ABObj beta) {
-    // figure out the opposite player tile (1 = blue; 2 = orange)
-    int unplayer;
-    if (player == 1) {
-      unplayer = 2;
-    } else {
-      unplayer = 1;
-    }
-    // return heuristic if leaf
-    if (depth == 0) {
-      if (player == 2) {
-        return new ABObj(heuristic(node.board), node.move);
-      } else {
-        return new ABObj(heuristic(node.board) * -1, node.move);
-      }
-    }
-    // find children for children
-    node.generateChildren(player);
-    for (int i = 0; i < node.children.size(); ++i) {
-      ABObj m = maxValue(node.children.get(i), depth-1, unplayer, alpha, beta);
-      if (m.value < beta.value) {
-        if (node.parent == null) {
-          beta = m; // return both child value and child move if root
-        } else {
-          beta.value = m.value;
-          beta.move = node.move.clone();
-        }
-      }
-      if (alpha.value >= beta.value) {
-        break;
-      }
-    }
-    return beta;
+    println("value: " + value);
+    return suitableMoves.get(int(random(0, suitableMoves.size()))).move;
   }
 
-  ABObj maxValue(ABNode node, int depth, int player, ABObj alpha, ABObj beta) {
-    // figure out the opposite player tile (1 = blue; 2 = orange)
-    int unplayer;
-    if (player == 1) {
-      unplayer = 2;
-    } else {
-      unplayer = 1;
-    }
-    // return heuristic if leaf
+  int alphabeta(ABNode node, int depth, int alpha, int beta, int player) {
     if (depth == 0) {
-      if (player == 2) {
-        return new ABObj(heuristic(node.board), node.move);
-      } else {
-        return new ABObj(heuristic(node.board) * -1, node.move);
+      // leaf node
+      node.value = heuristic(node.board);
+      return node.value;
+    } else if (player == 2) {
+      // maximizing player
+      node.value = Integer.MIN_VALUE;
+      node.generateChildren(player);
+      for (ABNode child : node.children) {
+        node.value = max(node.value, alphabeta(child, depth-1, alpha, beta, 1));
+        alpha = max(alpha, node.value);
+        if (alpha >= beta) {
+          break; // beta cut-off
+        }
       }
+      return node.value;
+    } else {
+      // minimizing player
+      node.value = Integer.MAX_VALUE;
+      node.generateChildren(player);
+      for (ABNode child : node.children) {
+        node.value = min(node.value, alphabeta(child, depth-1, alpha, beta, 2));
+        beta = min(beta, node.value);
+        if (alpha >= beta) {
+          break; // alpha cut-off
+        }
+      }
+      return node.value;
     }
-    // find children for children
-    node.generateChildren(player);
-    for (int i = 0; i < node.children.size(); ++i) {
-      ABObj m = minValue(node.children.get(i), depth-1, unplayer, alpha, beta);
-      if (m.value > alpha.value) {
-        print("l" + depth + " pv" + m.value);
-        alpha.value = m.value;
-        alpha.move = node.move.clone();
-      }
-      if (alpha.value >= beta.value) {
-        break;
-      }
-    }
-    return alpha;
   }
+  
+  // ABObj minValue(ABNode node, int depth, int player, ABObj alpha, ABObj beta) {
+  //   // figure out the opposite player tile (1 = blue; 2 = orange)
+  //   int unplayer;
+  //   if (player == 1) {
+  //     unplayer = 2;
+  //   } else {
+  //     unplayer = 1;
+  //   }
+  //   // return heuristic if leaf
+  //   if (depth == 0) {
+  //     if (player == 2) {
+  //       return new ABObj(heuristic(node.board), node.move);
+  //     } else {
+  //       return new ABObj(heuristic(node.board) * -1, node.move);
+  //     }
+  //   }
+  //   // find children for children
+  //   node.generateChildren(player);
+  //   for (int i = 0; i < node.children.size(); ++i) {
+  //     ABObj m = maxValue(node.children.get(i), depth-1, unplayer, alpha, beta);
+  //     if (m.value < beta.value) {
+  //       if (node.parent == null) {
+  //         beta = m; // return both child value and child move if root
+  //       } else {
+  //         beta.value = m.value;
+  //         beta.move = node.move.clone();
+  //       }
+  //     }
+  //     if (alpha.value >= beta.value) {
+  //       break;
+  //     }
+  //   }
+  //   return beta;
+  // }
+
+  // ABObj maxValue(ABNode node, int depth, int player, ABObj alpha, ABObj beta) {
+  //   // figure out the opposite player tile (1 = blue; 2 = orange)
+  //   int unplayer;
+  //   if (player == 1) {
+  //     unplayer = 2;
+  //   } else {
+  //     unplayer = 1;
+  //   }
+  //   // return heuristic if leaf
+  //   if (depth == 0) {
+  //     if (player == 2) {
+  //       return new ABObj(heuristic(node.board), node.move);
+  //     } else {
+  //       return new ABObj(heuristic(node.board) * -1, node.move);
+  //     }
+  //   }
+  //   // find children for children
+  //   node.generateChildren(player);
+  //   for (int i = 0; i < node.children.size(); ++i) {
+  //     ABObj m = minValue(node.children.get(i), depth-1, unplayer, alpha, beta);
+  //     if (m.value > alpha.value) {
+  //       alpha.value = m.value;
+  //       alpha.move = node.move.clone();
+  //     }
+  //     if (alpha.value >= beta.value) {
+  //       break;
+  //     }
+  //   }
+  //   return alpha;
+  // }
   
 
   int heuristic(int[][] board) {

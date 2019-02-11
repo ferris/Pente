@@ -31,19 +31,10 @@ $$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
 
 /*
   Pente Development Code
- Written by Ferris Linde
- Last updated 2019/01/16
+  Written by Ferris Linde
 */
 
-// SAVE NOTES:
-/*
-  • Everything is now  " a e s t h e t i c "
-  • Now it's time to get online multiplayer working.
-  • Then we can move on and try to get the impossible computer working.
-  • After that we can make a percentage of impossible usage and minimax scoring in order to change the difficulty
-*/
-
-String version = "Alpha 2.0.0";
+String version = "Alpha 2.0.1";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;
@@ -62,7 +53,7 @@ public void draw() {
     mainMenu();
   } else if (room.equals("modeMenu")) {
     modeMenu();
-  } else if (room.equals("local2player")) {
+  } else if (room.equals("game")) {
     game.drawBoard();
     game.drawPieces();
     game.turnGeneration();
@@ -95,7 +86,6 @@ class ABTree {
             throw new IllegalArgumentException("Move has to be of length 2; {x, y}");
         }
         this.root.move = move;
-        this.root.children = new ArrayList<ABNode>();
     }
 }
 
@@ -104,7 +94,7 @@ class ABNode {
     private int[] move;
     private int captures;
     private ABNode parent;
-    private List<ABNode> children;
+    private List<ABNode> children = new ArrayList<ABNode>();
 
     ABNode(int[][] board, int[] move) {
         this.board = board;
@@ -150,13 +140,13 @@ class GameAI {
     private int oCaptures = 0;
     private int tCaptures = 0;
 
-    public int[] AlphaBeta(int[][] board, int depth, int player) {
+    public int[] alphaBeta(int[][] board, int depth, int player) {
         int beginTime = millis();
         int[] fakeMove = {-1, -1};
         ABTree tree = new ABTree(board, fakeMove);
         ABObj m = minValue(tree.root, depth, player, new ABObj(Integer.MIN_VALUE, fakeMove), new ABObj(Integer.MAX_VALUE, fakeMove));
         int timeTaken = millis() - beginTime;
-        print("Processing time: " + timeTaken);
+        println("Processing time: " + timeTaken);
         return m.move;
     }
     
@@ -181,6 +171,11 @@ class GameAI {
         for (int i = 0; i < node.children.size(); ++i) {
             ABObj m = maxValue(node.children.get(i), depth-1, unplayer, alpha, beta);
             if (m.value < beta.value) {
+                if (node.parent == null) {
+                    beta = m; // return both value and move if root
+                } else {
+                    beta.value = m.value;
+                }
                 beta.value = m.value; // TODO: FIGURE OUT IF IT'S VALUE OR THE OBJ??
             }
             if (alpha.value >= beta.value) {
@@ -208,6 +203,7 @@ class GameAI {
         }
         // find children for children
         node.generateChildren(player);
+        println(node.children);
         for (int i = 0; i < node.children.size(); ++i) {
             ABObj m = minValue(node.children.get(i), depth-1, unplayer, alpha, beta);
             if (m.value > alpha.value) {
@@ -356,25 +352,33 @@ class Game {
 
 
   public void turnGeneration() {
+    boolean newMove = false;
+    int[] move = new int[2];
     if (mode.equals("local")) {
       int[] hmc = humanMoveCheck();
-      int[] move = {hmc[1], hmc[2]};
-      if (hmc[0] == 1 && isValidMove(pieces, move)) {
-        // a valid move has been played by the human
-        int captures = isCaptureMove(pieces, turn, move);
-        pieces[hmc[1]][hmc[2]] = turn;
-        if (captures != 0) {
-          if (turn == 1) {
-            oCaptures++;
-          } else {
-            tCaptures++;
-          }
-        }
-        if (turn == 1) {
-          turn = 2;
-        } else if (turn == 2) {
-          turn = 1;
-        }
+      newMove = hmc[0] == 1;
+    } else if (mode.equals("single")) {
+      if (turn == 1) {
+        int[] hmc = humanMoveCheck();
+        move = new int[] {hmc[1], hmc[2]};
+        newMove = hmc[0] == 1;
+      } else {
+        println("computer is thinking");
+        GameAI ai = new GameAI();
+        move = ai.alphaBeta(pieces, 3, turn);
+        newMove = true;
+      }
+    }
+    if (newMove && isValidMove(pieces, move)) {
+      // a valid move has been generated --> make the move
+      pieces[move[0]][move[1]] = turn; //<>//
+      // update captures and switch whose turn it is
+      if (turn == 1) {
+        oCaptures += isCaptureMove(pieces, turn, move);
+        turn = 2;
+      } else if (turn == 2) {
+        tCaptures += isCaptureMove(pieces, turn, move);
+        turn = 1;
       }
     }
   }
@@ -606,7 +610,7 @@ public void modeMenu() {
   // local multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
     game = new Game("local", 1);
-    room = "local2player";
+    room = "game";
   }
   // online multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
@@ -639,7 +643,8 @@ public void singleMenu() {
   // BUTTONS
   // easy button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    room = "mainMenu";
+    game = new Game("single", PApplet.parseInt(random(1, 3)));
+    room = "game";
   }
   // medium button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
@@ -654,8 +659,6 @@ public void singleMenu() {
     room = "modeMenu";
   }
 }
-
-
   public void settings() {  size(800, 600); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "Pente" };

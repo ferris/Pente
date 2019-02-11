@@ -44,7 +44,7 @@ void modeMenu() {
   // local multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
     game = new Game("local", 1);
-    room = "local2player";
+    room = "game";
   }
   // online multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
@@ -77,7 +77,8 @@ void singleMenu() {
   // BUTTONS
   // easy button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    room = "mainMenu";
+    game = new Game("single", int(random(1, 3)));
+    room = "game";
   }
   // medium button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
@@ -92,5 +93,3 @@ void singleMenu() {
     room = "modeMenu";
   }
 }
-
-

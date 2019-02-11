@@ -115,25 +115,34 @@ class Game {
 
 
   public void turnGeneration() {
+    boolean newMove = false;
+    int[] move = new int[2];
     if (mode.equals("local")) {
       int[] hmc = humanMoveCheck();
-      int[] move = {hmc[1], hmc[2]};
-      if (hmc[0] == 1 && isValidMove(pieces, move)) {
-        // a valid move has been played by the human
-        int captures = isCaptureMove(pieces, turn, move);
-        pieces[hmc[1]][hmc[2]] = turn;
-        if (captures != 0) {
-          if (turn == 1) {
-            oCaptures++;
-          } else {
-            tCaptures++;
-          }
-        }
-        if (turn == 1) {
-          turn = 2;
-        } else if (turn == 2) {
-          turn = 1;
-        }
+      newMove = hmc[0] == 1;
+    } else if (mode.equals("single")) {
+      if (turn == 1) {
+        int[] hmc = humanMoveCheck();
+        move = new int[] {hmc[1], hmc[2]};
+        newMove = hmc[0] == 1;
+      } else {
+        println("computer is thinking");
+        GameAI ai = new GameAI();
+        move = ai.alphaBeta(pieces, 2, turn);
+        print("( ");print(move[0]);print(", ");println(move[1]);print(" )");
+        newMove = true;
+      }
+    }
+    if (newMove && isValidMove(pieces, move)) {
+      // a valid move has been generated --> make the move
+      pieces[move[0]][move[1]] = turn;
+      // update captures and switch whose turn it is
+      if (turn == 1) {
+        oCaptures += isCaptureMove(pieces, turn, move);
+        turn = 2;
+      } else if (turn == 2) {
+        tCaptures += isCaptureMove(pieces, turn, move);
+        turn = 1;
       }
     }
   }

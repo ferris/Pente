@@ -35,7 +35,7 @@ void draw() {
     mainMenu();
   } else if (room.equals("modeMenu")) {
     modeMenu();
-  } else if (room.equals("local2player")) {
+  } else if (room.equals("game")) {
     game.drawBoard();
     game.drawPieces();
     game.turnGeneration();

@@ -40,6 +40,7 @@ void draw() {
     game.drawPieces();
     game.turnGeneration();
     game.drawTurnIndication();
+    game.drawCaptureIndication();
     game.winnerAlert();
   }
   mouseReleased = false;

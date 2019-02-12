@@ -124,6 +124,7 @@ class Game {
     int[] move = new int[2];
     if (mode.equals("local")) {
       int[] hmc = humanMoveCheck();
+      move = new int[] {hmc[1], hmc[2]};
       newMove = hmc[0] == 1;
     } else if (mode.equals("single")) {
       if (turn == 1) {
@@ -213,7 +214,6 @@ class Game {
     fill(214, 151, 97);
     rect(113, 13, 571, 571);
     // grid lines
-    stroke(16, 24, 60);
     for (int i = 65; i <= 533; i+=26) {
       line(165, i, 633, i);
       line(i+100, 65, i+100, 532);
@@ -276,6 +276,36 @@ class Game {
       fill(175, 60, 0);
       text("ORANGE", 747, 130);
     }
+  }
+
+  void drawCaptureIndication() {
+    noStroke();
+    fill(8, 10, 102);
+    rect(10, 80, 76, 179);
+    textSize(12);
+    fill(255);
+    text("Captures:", 47, 95);
+    stroke(16, 24, 60);
+    strokeWeight(1);
+    fill(105, 60, 81);
+    rect(13, 99, 70, 156, 7);
+    fill(214, 151, 97);
+    rect(16, 102, 64, 150, 5);
+    fill(16, 24, 60);
+    text(Integer.toString(tCaptures), 32, 120);
+    text(Integer.toString(oCaptures), 64, 120);
+    for (int i = 0; i < tCaptures; ++i) {
+      stroke(10, 120, 140);
+      fill(90, 200, 220);
+      ellipse(32, 136+(i*25), 20, 20);
+    } 
+    for (int i = 0; i < oCaptures; ++i) {
+      stroke(175, 60, 0);
+      fill(255, 140, 0);
+      ellipse(64, 136+(i*25), 20, 20);
+    }
+    stroke(16, 24, 60);
+    line(48, 102, 48, 252);
   }
 
   void winnerAlert() {

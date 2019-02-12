@@ -39,7 +39,8 @@ void modeMenu() {
   // BUTTONS
   // single player button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    room = "singleMenu";
+    game = new Game("single", int(random(1, 3)));
+    room = "game";
   }
   // local multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
@@ -56,7 +57,7 @@ void modeMenu() {
   }
 }
 
-
+/*
 void singleMenu() {
   noStroke();
   background(26, 188, 156);
@@ -93,3 +94,4 @@ void singleMenu() {
     room = "modeMenu";
   }
 }
+*/

@@ -41,8 +41,6 @@ void draw() {
     game.turnGeneration();
     game.drawTurnIndication();
     game.winnerAlert();
-  } else if (room.equals("singleMenu")) {
-    singleMenu();
   }
   mouseReleased = false;
 }

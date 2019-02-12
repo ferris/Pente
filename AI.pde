@@ -4,18 +4,15 @@ import java.util.*;
 class ABTree {
   private ABNode root;
 
-  ABTree(int[][] board, int[] move) {
-    this.root = new ABNode(board, move);
+  ABTree(int[][] board, int oCaptures, int tCaptures, int[] move) {
+    this.root = new ABNode(board, oCaptures, tCaptures, move);
     for (int i = 0; i < board.length; ++i) {
       if (board[i].length != board.length) {
         throw new IllegalArgumentException("Board must be a square!");
       }
     }
-    this.root.board = board;
-    if (move.length != 2) {
-      throw new IllegalArgumentException("Move has to be of length 2; {x, y}");
-    }
-    this.root.move = move;
+    // this.root.board = board;
+    // this.root.move = move;
   }
 }
 
@@ -23,11 +20,12 @@ class ABNode {
   private int value;
   private int[][] board;
   private int[] move;
-  private int captures;
+  private int oCaptures;
+  private int tCaptures;
   private ABNode parent;
   private List<ABNode> children = new ArrayList<ABNode>();
 
-  ABNode(int[][] board, int[] move) {
+  ABNode(int[][] board, int oCaptures, int tCaptures, int[] move) {
     // deep copy to prevent collisions
     this.board = new int[Game.n][Game.n];
     for (int i = 0; i < Game.n; ++i) {
@@ -35,6 +33,8 @@ class ABNode {
         this.board[i][j] = board[i][j];
       }
     }
+    this.oCaptures = oCaptures;
+    this.tCaptures = tCaptures;
     this.move = move.clone();
   }
 
@@ -44,11 +44,14 @@ class ABNode {
         int[] move = {i, j};
         if (game.isValidMove(this.board, move)) {
           int index = this.children.size();
-          this.children.add(new ABNode(this.board, move));
+          this.children.add(new ABNode(this.board, this.oCaptures, this.tCaptures, move));
           ABNode child = children.get(index);
           child.parent = this;
-          child.captures = this.captures;
-          child.captures += game.isCaptureMove(child.board, player, child.move);
+          if (player == 1) {
+            child.oCaptures += game.isCaptureMove(child.board, player, child.move);
+          } else if (player == 2) {
+            child.tCaptures += game.isCaptureMove(child.board, player, child.move);
+          }
           child.board[move[0]][move[1]] = player;
         }
       }
@@ -77,10 +80,11 @@ class GameAI {
   private int oCaptures = 0;
   private int tCaptures = 0;
 
-  public int[] getComputerMove(int[][] board, int depth, int player) {
+  public int[] getComputerMove(int[][] board, int oCaptures, int tCaptures, int depth, int player) {
     int beginTime = millis();
-    ABTree tree = new ABTree(board, new int[] {-1, -1});
+    ABTree tree = new ABTree(board, oCaptures, tCaptures, new int[] {-1, -1});
     int value = alphabeta(tree.root, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, player);
+    print("val" +  value);
     List<ABNode> suitableMoves = new ArrayList<ABNode>();
     for (ABNode child : tree.root.children) {
       if (child.value == value) {
@@ -96,7 +100,7 @@ class GameAI {
   int alphabeta(ABNode node, int depth, int alpha, int beta, int player) {
     if (depth == 0) {
       // leaf node
-      node.value = heuristic(node.board);
+      node.value = heuristic(node.board, node.oCaptures, node.tCaptures);
       return node.value;
     } else if (player == 2) {
       // maximizing player
@@ -125,22 +129,33 @@ class GameAI {
     }
   }
 
-  int heuristic(int[][] board) {
+  int heuristic(int[][] board, int oCaptures, int tCaptures) {
     // this is a super dumb heuristic
     // all it does is see how many tiles are on the board
     // computer tiles - human tiles
-    int tileCount = 0;
-    int unTileCount = 0;
 
-    for (int i = 0; i < board.length; ++i) {
-      for (int j = 0; j < board[i].length; ++j) {
-        if (board[i][j] == 2) {
-          tileCount++;
-        } else if (board[i][j] == 1) {
-          unTileCount++;
-        }
-      }
-    }
-    return tileCount - unTileCount;
+    return captureDifferenceHt(oCaptures, tCaptures);
+
+    // println("oCaptures: " + oCaptures);
+    // println("tCaptures: " + tCaptures);
+
+    // int tileCount = 0;
+    // int unTileCount = 0;
+
+    // for (int i = 0; i < board.length; ++i) {
+    //   for (int j = 0; j < board[i].length; ++j) {
+    //     if (board[i][j] == 2) {
+    //       tileCount++;
+    //     } else if (board[i][j] == 1) {
+    //       unTileCount++;
+    //     }
+    //   }
+    // }
+    // return tileCount - unTileCount;
+  }
+
+  int captureDifferenceHt(int oCaptures, int tCaptures) {
+    println("diff" + str(tCaptures - oCaptures));
+    return tCaptures - oCaptures;
   }
 }

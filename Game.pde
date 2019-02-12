@@ -135,11 +135,10 @@ class Game {
         println();
         println("computer is thinking");
         GameAI ai = new GameAI();
-        move = ai.getComputerMove(pieces, 2, turn);
+        move = ai.getComputerMove(pieces, oCaptures, tCaptures, 2, turn);
         print("( ");print(move[0]);print(", ");print(move[1]);println(" )");
         newMove = true;
         ai = null;
-        System.gc();
       }
     }
     if (newMove && isValidMove(pieces, move)) {

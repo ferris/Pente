@@ -113,6 +113,15 @@ class GameAI {
         node.value = (short)(max(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(1))));
         if (currentDepth < depth - 1) {
           i.remove();
+        } else {
+          int currentMemory = int((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1048576);
+          print("current_memory: ");
+          print(currentMemory);
+          println(" MiB");
+          if (currentMemory > 1024) {
+            println("Garbage collecting!");
+            System.gc();
+          }
         }
         alpha = (short)(max(alpha, node.value));
         if (alpha >= beta) {

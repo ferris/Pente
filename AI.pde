@@ -130,28 +130,7 @@ class GameAI {
   }
 
   int heuristic(int[][] board, int oCaptures, int tCaptures) {
-    // this is a super dumb heuristic
-    // all it does is see how many tiles are on the board
-    // computer tiles - human tiles
-
     return captureDifferenceHt(oCaptures, tCaptures);
-
-    // println("oCaptures: " + oCaptures);
-    // println("tCaptures: " + tCaptures);
-
-    // int tileCount = 0;
-    // int unTileCount = 0;
-
-    // for (int i = 0; i < board.length; ++i) {
-    //   for (int j = 0; j < board[i].length; ++j) {
-    //     if (board[i][j] == 2) {
-    //       tileCount++;
-    //     } else if (board[i][j] == 1) {
-    //       unTileCount++;
-    //     }
-    //   }
-    // }
-    // return tileCount - unTileCount;
   }
 
   int captureDifferenceHt(int oCaptures, int tCaptures) {

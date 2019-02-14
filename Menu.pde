@@ -39,12 +39,13 @@ void modeMenu() {
   // BUTTONS
   // single player button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    game = new Game("single", int(random(1, 3)));
+    game = new Game("single", byte(random(1, 3)));
+    ai = new GameAI();
     room = "game";
   }
   // local multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
-    game = new Game("local", 1);
+    game = new Game("local", byte(1));
     room = "game";
   }
   // online multiplayer button

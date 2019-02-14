@@ -20,6 +20,7 @@ String version = "Alpha 2.1.0";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;
+GameAI ai;
 
 void setup() {
   // V-sync

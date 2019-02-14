@@ -4,30 +4,28 @@ import java.util.*;
 class ABTree {
   private ABNode root;
 
-  ABTree(int[][] board, int oCaptures, int tCaptures, int[] move) {
+  ABTree(byte[][] board, byte oCaptures, byte tCaptures, byte[] move) {
     this.root = new ABNode(board, oCaptures, tCaptures, move);
     for (int i = 0; i < board.length; ++i) {
       if (board[i].length != board.length) {
         throw new IllegalArgumentException("Board must be a square!");
       }
     }
-    // this.root.board = board;
-    // this.root.move = move;
   }
 }
 
 class ABNode {
-  private int value;
-  private int[][] board;
-  private int[] move;
-  private int oCaptures;
-  private int tCaptures;
+  private short value;
+  private byte[][] board;
+  private byte[] move;
+  private byte oCaptures;
+  private byte tCaptures;
   private ABNode parent;
   private List<ABNode> children = new ArrayList<ABNode>();
 
-  ABNode(int[][] board, int oCaptures, int tCaptures, int[] move) {
+  ABNode(byte[][] board, byte oCaptures, byte tCaptures, byte[] move) {
     // deep copy to prevent collisions
-    this.board = new int[Game.n][Game.n];
+    this.board = new byte[Game.n][Game.n];
     for (int i = 0; i < Game.n; ++i) {
       for (int j = 0; j < Game.n; ++j) {
         this.board[i][j] = board[i][j];
@@ -38,10 +36,10 @@ class ABNode {
     this.move = move.clone();
   }
 
-  void generateChildren(int player) {
-    for (int i = 0; i < Game.n; ++i) {
-      for (int j = 0; j < Game.n; ++j) {
-        int[] move = {i, j};
+  void generateChildren(byte player) {
+    for (byte i = 0; i < Game.n; ++i) {
+      for (byte j = 0; j < Game.n; ++j) {
+        byte[] move = {i, j};
         if (game.isValidMove(this.board, move)) {
           int index = this.children.size();
           this.children.add(new ABNode(this.board, this.oCaptures, this.tCaptures, move));
@@ -61,10 +59,10 @@ class ABNode {
 
 
 class ABObj {
-  int value;
-  int[] move;
+  short value;
+  byte[] move;
 
-  ABObj(int value, int[] move) {
+  ABObj(short value, byte[] move) {
     this.value = value;
     if (move.length != 2) {
       throw new IllegalArgumentException("Move has to be of length 2; {x, y}");
@@ -75,16 +73,15 @@ class ABObj {
 
 
 class GameAI {
-  private final int SIZE = 19;
-  private int[] prevMove;
-  private int oCaptures = 0;
-  private int tCaptures = 0;
+  private final byte SIZE = 19;
+  private byte[] prevMove;
+  private byte oCaptures = 0;
+  private byte tCaptures = 0;
 
-  public int[] getComputerMove(int[][] board, int oCaptures, int tCaptures, int depth, int player) {
+  public byte[] getComputerMove(byte[][] board, byte oCaptures, byte tCaptures, byte depth, byte player) {
     int beginTime = millis();
-    ABTree tree = new ABTree(board, oCaptures, tCaptures, new int[] {-1, -1});
-    int value = alphabeta(tree.root, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, player);
-    print("val" +  value);
+    ABTree tree = new ABTree(board, oCaptures, tCaptures, new byte[] {-1, -1});
+    short value = alphabeta(tree.root, depth, Short.MIN_VALUE, Short.MAX_VALUE, player);
     List<ABNode> suitableMoves = new ArrayList<ABNode>();
     for (ABNode child : tree.root.children) {
       if (child.value == value) {
@@ -97,18 +94,18 @@ class GameAI {
     return suitableMoves.get(int(random(0, suitableMoves.size()))).move;
   }
 
-  int alphabeta(ABNode node, int depth, int alpha, int beta, int player) {
+  short alphabeta(ABNode node, byte depth, short alpha, short beta, byte player) {
     if (depth == 0) {
       // leaf node
       node.value = heuristic(node.board, node.oCaptures, node.tCaptures);
       return node.value;
     } else if (player == 2) {
       // maximizing player
-      node.value = Integer.MIN_VALUE;
+      node.value = Short.MIN_VALUE;
       node.generateChildren(player);
       for (ABNode child : node.children) {
-        node.value = max(node.value, alphabeta(child, depth-1, alpha, beta, 1));
-        alpha = max(alpha, node.value);
+        node.value = (short)(max(node.value, alphabeta(child, byte(depth-1), alpha, beta, byte(1))));
+        alpha = (short)(max(alpha, node.value));
         if (alpha >= beta) {
           break; // beta cut-off
         }
@@ -116,11 +113,11 @@ class GameAI {
       return node.value;
     } else {
       // minimizing player
-      node.value = Integer.MAX_VALUE;
+      node.value = Short.MAX_VALUE;
       node.generateChildren(player);
       for (ABNode child : node.children) {
-        node.value = min(node.value, alphabeta(child, depth-1, alpha, beta, 2));
-        beta = min(beta, node.value);
+        node.value = (short)(min(node.value, alphabeta(child, byte(depth-1), alpha, beta, byte(2))));
+        beta = (short)(min(beta, node.value));
         if (alpha >= beta) {
           break; // alpha cut-off
         }
@@ -129,12 +126,12 @@ class GameAI {
     }
   }
 
-  int heuristic(int[][] board, int oCaptures, int tCaptures) {
+  short heuristic(byte[][] board, byte oCaptures, byte tCaptures) {
     return captureDifferenceHt(oCaptures, tCaptures);
   }
 
-  int captureDifferenceHt(int oCaptures, int tCaptures) {
-    println("diff" + str(tCaptures - oCaptures));
-    return tCaptures - oCaptures;
+  short captureDifferenceHt(byte oCaptures, byte tCaptures) {
+    //println("diff" + str(tCaptures - oCaptures));
+    return (short)(tCaptures - oCaptures);
   }
 }

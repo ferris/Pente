@@ -135,7 +135,7 @@ class Game {
         println();
         println("computer is thinking");
         memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        move = ai.getComputerMove(pieces, oCaptures, tCaptures, byte(3), turn);
+        move = ai.getComputerMove(pieces, oCaptures, tCaptures, turn);
         print("[");print(move[0]);print("] [");print(move[1]);println("]");
         memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         println("memory_before: " + str(memoryBefore/1048576) + "MiB");

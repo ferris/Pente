@@ -77,8 +77,13 @@ class GameAI {
   private byte[] prevMove;
   private byte oCaptures = 0;
   private byte tCaptures = 0;
+  private byte depth;
 
-  public byte[] getComputerMove(byte[][] board, byte oCaptures, byte tCaptures, byte depth, byte player) {
+  GameAI(byte depth) {
+    this.depth = depth;
+  }
+
+  public byte[] getComputerMove(byte[][] board, byte oCaptures, byte tCaptures, byte player) {
     int beginTime = millis();
     ABTree tree = new ABTree(board, oCaptures, tCaptures, new byte[] {-1, -1});
     short value = alphabeta(tree.root, depth, Short.MIN_VALUE, Short.MAX_VALUE, player);
@@ -94,8 +99,8 @@ class GameAI {
     return suitableMoves.get(int(random(0, suitableMoves.size()))).move;
   }
 
-  short alphabeta(ABNode node, byte depth, short alpha, short beta, byte player) {
-    if (depth == 0) {
+  short alphabeta(ABNode node, byte currentDepth, short alpha, short beta, byte player) {
+    if (currentDepth == 0) {
       // leaf node
       node.value = heuristic(node.board, node.oCaptures, node.tCaptures);
       return node.value;
@@ -103,25 +108,51 @@ class GameAI {
       // maximizing player
       node.value = Short.MIN_VALUE;
       node.generateChildren(player);
-      for (ABNode child : node.children) {
-        node.value = (short)(max(node.value, alphabeta(child, byte(depth-1), alpha, beta, byte(1))));
+      Iterator<ABNode> i = node.children.iterator();
+      while (i.hasNext()) {
+        node.value = (short)(max(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(1))));
+        if (currentDepth < depth - 1) {
+          i.remove();
+        }
         alpha = (short)(max(alpha, node.value));
         if (alpha >= beta) {
           break; // beta cut-off
         }
       }
+      /*
+      for (ABNode child : node.children) {
+        node.value = (short)(max(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
+        alpha = (short)(max(alpha, node.value));
+        if (alpha >= beta) {
+          break; // beta cut-off
+        }
+      }
+      */
       return node.value;
     } else {
       // minimizing player
       node.value = Short.MAX_VALUE;
       node.generateChildren(player);
-      for (ABNode child : node.children) {
-        node.value = (short)(min(node.value, alphabeta(child, byte(depth-1), alpha, beta, byte(2))));
+      Iterator<ABNode> i = node.children.iterator();
+      while (i.hasNext()) {
+        node.value = (short)(min(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(2))));
+        if (currentDepth < depth - 1) {
+          i.remove();
+        }
         beta = (short)(min(beta, node.value));
         if (alpha >= beta) {
           break; // alpha cut-off
         }
       }
+      /*
+      for (ABNode child : node.children) {
+        node.value = (short)(min(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
+        beta = (short)(min(beta, node.value));
+        if (alpha >= beta) {
+          break; // alpha cut-off
+        }
+      }
+      */
       return node.value;
     }
   }

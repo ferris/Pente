@@ -84,19 +84,58 @@ class GameAI {
   }
 
   public byte[] getComputerMove(byte[][] board, byte oCaptures, byte tCaptures, byte player) {
+    // find opposite player
+    byte unPlayer;
+    if (player == 1) {
+      unPlayer = 2;
+    } else {
+      unPlayer = 1;
+    }
     int beginTime = millis();
-    ABTree tree = new ABTree(board, oCaptures, tCaptures, new byte[] {-1, -1});
-    short value = alphabeta(tree.root, depth, Short.MIN_VALUE, Short.MAX_VALUE, player);
-    List<ABNode> suitableMoves = new ArrayList<ABNode>();
-    for (ABNode child : tree.root.children) {
-      if (child.value == value) {
-        suitableMoves.add(child);
+    // generate ABP value board and find the maximum value within
+    short[][] abValueBoard = new short[Game.n][Game.n];
+    short bestValue = 0;
+    for (byte i = 0; i < Game.n; ++i) {
+      for (byte j = 0; j < Game.n; ++j) {
+        print("Now analyzing move: "); println((i*Game.n)+j+1);
+        if (board[i][j] == 0) {
+          ABNode testingNode = new ABNode(board, oCaptures, tCaptures, new byte[]{i, j});
+          // deletable start (during second stage where this is moved to ABNode's constructor)
+          if (player == 1) {
+            testingNode.oCaptures += game.isCaptureMove(testingNode.board, player, testingNode.move);
+          } else if (player == 2) {
+            testingNode.tCaptures += game.isCaptureMove(testingNode.board, player, testingNode.move);
+          }
+          testingNode.board[i][j] = player;
+          // deletable end
+          abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), Short.MIN_VALUE, Short.MAX_VALUE, unPlayer);
+          int currentMemory = int((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1048576);
+          print("current_memory: "); print(currentMemory); println(" MiB");
+          if (currentMemory > 1024) {
+            println("Garbage collecting!");
+            System.gc();
+          }
+          if (player == 1) {
+            bestValue = (short)(min(bestValue, abValueBoard[i][j]));
+          } else if (player == 2) {
+            bestValue = (short)(max(bestValue, abValueBoard[i][j]));
+          }
+        }
+      }
+    }
+    // cycle through board looking for the max value moves
+    List<byte[]> suitableMoves = new ArrayList<byte[]>();
+    for (byte i = 0; i < Game.n; ++i) {
+      for (byte j = 0; j < Game.n; ++j) {
+        if (abValueBoard[i][j] == bestValue) {
+          suitableMoves.add(new byte[]{i, j});
+        }
       }
     }
     int timeTaken = millis() - beginTime;
     println("Processing time: " + timeTaken + "ms");
-    println("value: " + value);
-    return suitableMoves.get(int(random(0, suitableMoves.size()))).move;
+    println("value: " + bestValue);
+    return suitableMoves.get(int(random(0, suitableMoves.size())));
   }
 
   short alphabeta(ABNode node, byte currentDepth, short alpha, short beta, byte player) {
@@ -111,18 +150,7 @@ class GameAI {
       Iterator<ABNode> i = node.children.iterator();
       while (i.hasNext()) {
         node.value = (short)(max(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(1))));
-        if (currentDepth < depth - 1) {
-          i.remove();
-        } else {
-          int currentMemory = int((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1048576);
-          print("current_memory: ");
-          print(currentMemory);
-          println(" MiB");
-          if (currentMemory > 1024) {
-            println("Garbage collecting!");
-            System.gc();
-          }
-        }
+        i.remove();
         alpha = (short)(max(alpha, node.value));
         if (alpha >= beta) {
           break; // beta cut-off

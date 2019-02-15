@@ -95,6 +95,8 @@ class GameAI {
     // generate ABP value board and find the maximum value within
     short[][] abValueBoard = new short[Game.n][Game.n];
     short bestValue = 0;
+    short currentMax = Short.MIN_VALUE;
+    short currentMin = Short.MAX_VALUE;
     for (byte i = 0; i < Game.n; ++i) {
       for (byte j = 0; j < Game.n; ++j) {
         print("Now analyzing move: "); println((i*Game.n)+j+1);
@@ -108,22 +110,42 @@ class GameAI {
           }
           testingNode.board[i][j] = player;
           // deletable end
-          abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), Short.MIN_VALUE, Short.MAX_VALUE, unPlayer);
+          
+          if (player == 1) {
+            abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), Short.MIN_VALUE, currentMin, unPlayer);
+          } else if (player == 2) {
+            abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), currentMax, Short.MAX_VALUE, unPlayer);
+          }
+          print("this_value: "); println(abValueBoard[i][j]);
+          print("current_max: "); println(currentMax);
+          if (currentMax < abValueBoard[i][j]) {
+            println("GOTTA GET NEW MAX");
+          }
+          //abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), Short.MIN_VALUE, Short.MAX_VALUE, unPlayer);
           int currentMemory = int((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1048576);
           print("current_memory: "); print(currentMemory); println(" MiB");
           if (currentMemory > 1024) {
             println("Garbage collecting!");
             System.gc();
           }
+          currentMin = (short)(min(currentMin, abValueBoard[i][j]));
+          currentMax = (short)(max(currentMax, abValueBoard[i][j]));
+        } else {
+          // in case it isn't a valid move, it cannot be kept as 0
           if (player == 1) {
-            bestValue = (short)(min(bestValue, abValueBoard[i][j]));
-          } else if (player == 2) {
-            bestValue = (short)(max(bestValue, abValueBoard[i][j]));
+            abValueBoard[i][j] = Short.MAX_VALUE;
+          } else {
+            abValueBoard[i][j] = Short.MIN_VALUE;
           }
         }
       }
     }
-    // cycle through board looking for the max value moves
+    // cycle through board looking for the best value moves
+    if (player == 1) {
+      bestValue = currentMin;
+    } else if (player == 2) {
+      bestValue = currentMax;
+    }
     List<byte[]> suitableMoves = new ArrayList<byte[]>();
     for (byte i = 0; i < Game.n; ++i) {
       for (byte j = 0; j < Game.n; ++j) {
@@ -134,8 +156,11 @@ class GameAI {
     }
     int timeTaken = millis() - beginTime;
     println("Processing time: " + timeTaken + "ms");
+    println("minval: " + currentMin);
+    println("maxval: " + currentMax);
     println("value: " + bestValue);
-    return suitableMoves.get(int(random(0, suitableMoves.size())));
+    //return suitableMoves.get(int(random(0, suitableMoves.size())));
+    return suitableMoves.get(0);
   }
 
   short alphabeta(ABNode node, byte currentDepth, short alpha, short beta, byte player) {

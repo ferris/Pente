@@ -166,7 +166,7 @@ class Game {
     } else if (tCaptures >= 5) {
       return 2;
     }
-    // row check
+    // column check
     for (int r = 0; r < n - 4; ++r) {
       for (int c = 0; c < n; ++c) {
         if (winHelper(pieces[r][c],pieces[r+1][c],pieces[r+2][c],pieces[r+3][c],pieces[r+4][c])) {
@@ -174,7 +174,7 @@ class Game {
         }
       }
     }
-    // column check
+    // row check
     for (int r = 0; r < n; ++r) {
       for (int c = 0; c < n - 4; ++c) {
         if (winHelper(pieces[r][c],pieces[r][c+1],pieces[r][c+2],pieces[r][c+3],pieces[r][c+4])) {

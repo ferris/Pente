@@ -39,7 +39,7 @@ void modeMenu() {
   // BUTTONS
   // single player button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    game = new Game("single", byte(random(1, 3)));
+    game = new Game("single", byte(1));
     ai = new GameAI(byte(3));
     room = "game";
   }

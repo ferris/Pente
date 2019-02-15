@@ -55,22 +55,6 @@ class ABNode {
       }
     }
   }
-
-  ABNode getChild(byte player, byte[] move) {
-    ABNode child = new ABNode(this.board, this.oCaptures, this.tCaptures, move);
-    if (player == 1) {
-      child.oCaptures += game.isCaptureMove(child.board, player, child.move);
-    } else if (player == 2) {
-      child.tCaptures += game.isCaptureMove(child.board, player, child.move);
-    }
-    if (player == 1) {
-      child.oCaptures += game.isCaptureMove(child.board, player, child.move);
-    } else if (player == 2) {
-      child.tCaptures += game.isCaptureMove(child.board, player, child.move);
-    }
-    child.board[move[0]][move[1]] = player;
-    return child;
-  }
 }
 
 
@@ -132,16 +116,16 @@ class GameAI {
           } else if (player == 2) {
             abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), currentMax, Short.MAX_VALUE, unPlayer);
           }
-          print("this_value: "); println(abValueBoard[i][j]);
-          print("current_max: "); println(currentMax);
+          //print("this_value: "); println(abValueBoard[i][j]);
+          //print("current_max: "); println(currentMax);
           if (currentMax < abValueBoard[i][j]) {
             println("GOTTA GET NEW MAX");
           }
           //abValueBoard[i][j] = alphabeta(testingNode, byte(depth-1), Short.MIN_VALUE, Short.MAX_VALUE, unPlayer);
           int currentMemory = int((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1048576);
-          print("current_memory: "); print(currentMemory); println(" MiB");
+          //print("current_memory: "); print(currentMemory); println(" MiB");
           if (currentMemory > 1024) {
-            println("Garbage collecting!");
+            //println("Garbage collecting!");
             System.gc();
           }
           currentMin = (short)(min(currentMin, abValueBoard[i][j]));
@@ -175,6 +159,7 @@ class GameAI {
     println("minval: " + currentMin);
     println("maxval: " + currentMax);
     println("value: " + bestValue);
+
     //return suitableMoves.get(int(random(0, suitableMoves.size())));
     return suitableMoves.get(0);
   }
@@ -182,16 +167,24 @@ class GameAI {
   short alphabeta(ABNode node, byte currentDepth, short alpha, short beta, byte player) {
     if (currentDepth == 0) {
       // leaf node
+      //node.value = heuristic(node.board, node.oCaptures, node.tCaptures);
       return heuristic(node.board, node.oCaptures, node.tCaptures);
     } else if (player == 2) {
       // maximizing player
+      //
       short value = Short.MIN_VALUE;
       for (byte i = 0; i < Game.n; ++i) {
         for (byte j = 0; j < Game.n; ++j) {
-          byte[] move = new byte[]{i, j};
+          byte[] move = {i, j};
           if (game.isValidMove(node.board, move)) {
-            ABNode child = node.getChild(byte(2), move);
-            value = (short)(max(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
+            ABNode child = new ABNode(node.board, node.oCaptures, node.tCaptures, move);
+            child.tCaptures += game.isCaptureMove(child.board, player, child.move);
+            if (i == 2 && j == 1) {
+              println("TCAPTURES:::::::::::: " + tCaptures);
+              println("CHILDTCAPTURES::::::: " + child.tCaptures);
+            }
+            child.board[move[0]][move[1]] = player;
+            value = (short)(max(value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
             alpha = (short)(max(alpha, value));
             if (alpha >= beta) {
               break; // beta cut-off
@@ -199,19 +192,35 @@ class GameAI {
           }
         }
       }
-      return value;
+      return value;//
+      /*
+      node.value = Short.MIN_VALUE;
+      node.generateChildren(player);
+      Iterator<ABNode> i = node.children.iterator();
+      while (i.hasNext()) {
+        node.value = (short)(max(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(1))));
+        i.remove();
+        alpha = (short)(max(alpha, node.value));
+        if (alpha >= beta) {
+          break; // beta cut-off
+        }
+      }
+      return node.value;
+      */
     } else {
       // minimizing player
       short value = Short.MAX_VALUE;
       for (byte i = 0; i < Game.n; ++i) {
         for (byte j = 0; j < Game.n; ++j) {
-          byte[] move = new byte[]{i, j};
+          byte[] move = {i, j};
           if (game.isValidMove(node.board, move)) {
-            ABNode child = node.getChild(byte(2), move);
-            value = (short)(min(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
+            ABNode child = new ABNode(node.board, node.oCaptures, node.tCaptures, move);
+            child.oCaptures += game.isCaptureMove(child.board, player, child.move);
+            child.board[move[0]][move[1]] = player;
+            value = (short)(min(value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
             beta = (short)(min(beta, value));
             if (alpha >= beta) {
-              break; // alpha cut-off
+              break;
             }
           }
         }

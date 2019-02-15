@@ -55,6 +55,22 @@ class ABNode {
       }
     }
   }
+
+  ABNode getChild(byte player, byte[] move) {
+    ABNode child = new ABNode(this.board, this.oCaptures, this.tCaptures, move);
+    if (player == 1) {
+      child.oCaptures += game.isCaptureMove(child.board, player, child.move);
+    } else if (player == 2) {
+      child.tCaptures += game.isCaptureMove(child.board, player, child.move);
+    }
+    if (player == 1) {
+      child.oCaptures += game.isCaptureMove(child.board, player, child.move);
+    } else if (player == 2) {
+      child.tCaptures += game.isCaptureMove(child.board, player, child.move);
+    }
+    child.board[move[0]][move[1]] = player;
+    return child;
+  }
 }
 
 
@@ -166,56 +182,41 @@ class GameAI {
   short alphabeta(ABNode node, byte currentDepth, short alpha, short beta, byte player) {
     if (currentDepth == 0) {
       // leaf node
-      node.value = heuristic(node.board, node.oCaptures, node.tCaptures);
-      return node.value;
+      return heuristic(node.board, node.oCaptures, node.tCaptures);
     } else if (player == 2) {
       // maximizing player
-      node.value = Short.MIN_VALUE;
-      node.generateChildren(player);
-      Iterator<ABNode> i = node.children.iterator();
-      while (i.hasNext()) {
-        node.value = (short)(max(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(1))));
-        i.remove();
-        alpha = (short)(max(alpha, node.value));
-        if (alpha >= beta) {
-          break; // beta cut-off
+      short value = Short.MIN_VALUE;
+      for (byte i = 0; i < Game.n; ++i) {
+        for (byte j = 0; j < Game.n; ++j) {
+          byte[] move = new byte[]{i, j};
+          if (game.isValidMove(node.board, move)) {
+            ABNode child = node.getChild(byte(2), move);
+            value = (short)(max(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
+            alpha = (short)(max(alpha, value));
+            if (alpha >= beta) {
+              break; // beta cut-off
+            }
+          }
         }
       }
-      /*
-      for (ABNode child : node.children) {
-        node.value = (short)(max(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
-        alpha = (short)(max(alpha, node.value));
-        if (alpha >= beta) {
-          break; // beta cut-off
-        }
-      }
-      */
-      return node.value;
+      return value;
     } else {
       // minimizing player
-      node.value = Short.MAX_VALUE;
-      node.generateChildren(player);
-      Iterator<ABNode> i = node.children.iterator();
-      while (i.hasNext()) {
-        node.value = (short)(min(node.value, alphabeta(i.next(), byte(currentDepth-1), alpha, beta, byte(2))));
-        if (currentDepth < depth - 1) {
-          i.remove();
-        }
-        beta = (short)(min(beta, node.value));
-        if (alpha >= beta) {
-          break; // alpha cut-off
-        }
-      }
-      /*
-      for (ABNode child : node.children) {
-        node.value = (short)(min(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
-        beta = (short)(min(beta, node.value));
-        if (alpha >= beta) {
-          break; // alpha cut-off
+      short value = Short.MAX_VALUE;
+      for (byte i = 0; i < Game.n; ++i) {
+        for (byte j = 0; j < Game.n; ++j) {
+          byte[] move = new byte[]{i, j};
+          if (game.isValidMove(node.board, move)) {
+            ABNode child = node.getChild(byte(2), move);
+            value = (short)(min(node.value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
+            beta = (short)(min(beta, value));
+            if (alpha >= beta) {
+              break; // alpha cut-off
+            }
+          }
         }
       }
-      */
-      return node.value;
+      return value;
     }
   }
 

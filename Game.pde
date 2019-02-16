@@ -159,7 +159,7 @@ class Game {
   }
 
 
-  byte winCheck() {
+  byte winCheck(byte[][] board) {
     // five captures check
     if (oCaptures >= 5) {
       return 1;
@@ -169,32 +169,32 @@ class Game {
     // column check
     for (int r = 0; r < n - 4; ++r) {
       for (int c = 0; c < n; ++c) {
-        if (winHelper(pieces[r][c],pieces[r+1][c],pieces[r+2][c],pieces[r+3][c],pieces[r+4][c])) {
-          return pieces[r][c];
+        if (winHelper(board[r][c],board[r+1][c],board[r+2][c],board[r+3][c],board[r+4][c])) {
+          return board[r][c];
         }
       }
     }
     // row check
     for (int r = 0; r < n; ++r) {
       for (int c = 0; c < n - 4; ++c) {
-        if (winHelper(pieces[r][c],pieces[r][c+1],pieces[r][c+2],pieces[r][c+3],pieces[r][c+4])) {
-          return pieces[r][c];
+        if (winHelper(board[r][c],board[r][c+1],board[r][c+2],board[r][c+3],board[r][c+4])) {
+          return board[r][c];
         }
       }
     }
     // down diagonal
     for (int r = 0; r < n - 4; ++r) {
       for (int c = 0; c < n - 4; ++c) {
-        if (winHelper(pieces[r][c],pieces[r+1][c+1],pieces[r+2][c+2],pieces[r+3][c+3],pieces[r+4][c+4])) {
-          return pieces[r][c];
+        if (winHelper(board[r][c],board[r+1][c+1],board[r+2][c+2],board[r+3][c+3],board[r+4][c+4])) {
+          return board[r][c];
         }
       }
     }
     // up diagonal
     for (int r = 4; r < n; ++r) {
       for (int c = 0; c < n - 4; ++c) {
-        if (winHelper(pieces[r][c],pieces[r-1][c+1],pieces[r-2][c+2],pieces[r-3][c+3],pieces[r-4][c+4])) {
-          return pieces[r][c];
+        if (winHelper(board[r][c],board[r-1][c+1],board[r-2][c+2],board[r-3][c+3],board[r-4][c+4])) {
+          return board[r][c];
         }
       }
     }
@@ -312,7 +312,7 @@ class Game {
 
   void winnerAlert() {
     if (winner == 0) {
-      winner = winCheck();
+      winner = winCheck(pieces);
     }
     if (winner != 0) {
       color darkC;

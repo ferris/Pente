@@ -6,10 +6,9 @@ import java.util.Random;
 
 public class MCTNode {
   // general Monte Carlo Tree Search attributes
-  Random rand = new Random();
-  static final double epsilon = 1e-6;
+  static final float epsilon = 1e-6;
   MCTNode[] children;
-  double numVisits, totalValue;
+  float numVisits, totalValue;
   // Pente specific attributes
   private int[][] board;
   private int[] move;
@@ -32,10 +31,11 @@ public class MCTNode {
     // update capture values and board to reflect move
     if (player == 1) {
       this.oCaptures += game.isCaptureMove(this.board, player, this.move);
+      this.board[move[0]][move[1]] = 2;
     } else if (player == 2) {
       this.tCaptures += game.isCaptureMove(this.board, player, this.move);
+      this.board[move[0]][move[1]] = 1;
     }
-    this.board[move[0]][move[1]] = player;
   }
 
   public void selectAction() {
@@ -50,7 +50,7 @@ public class MCTNode {
     current.expand();
     MCTNode newNode = current.select();
     visited.add(newNode);
-    int win = simulate(newNode);
+    int win = (1 == this.board[this.move[0]][this.move[1]] ? 2 : 1) == simulate(newNode) ? 1 : 0;
     for (MCTNode node : visited) {
       node.updateStats(win);
     }
@@ -58,10 +58,10 @@ public class MCTNode {
 
   private MCTNode select() {
     MCTNode selected = null;
-    double bestValue = Double.MIN_VALUE;
+    float bestValue = Float.MIN_VALUE;
     for (MCTNode child : children) {
       // initialize uct with small random number to break unexplored node ties in a random fashion
-      double uctValue = rand.nextDouble() * epsilon;
+      float uctValue = random(1) * epsilon;
       // balance exploration and exploitation by applying UCT1 (Upper Confidence Bound 1 applied to trees)
       uctValue += child.totalValue / (child.numVisits + epsilon);
       uctValue += Math.sqrt(Math.log(numVisits+1) / (child.numVisits + epsilon));
@@ -76,20 +76,7 @@ public class MCTNode {
   }
 
   private void expand() {
-    int[] bounds = ai.searchField(this.board);
-    int[][] possibleMoves = new int[((bounds[1]+1)-bounds[0])*((bounds[3]+1)-bounds[2])][2];
-    short diff = 0;
-    for (int i = bounds[0]; i < bounds[1]; ++i) {
-      for (int j = bounds[2]; j < bounds[3]; ++j) {
-        int[] currentMove = {i, j};
-        if (game.isValidMove(this.board, currentMove)) {
-          possibleMoves[(i-bounds[0])*((bounds[3]+1)-bounds[2])+(j-bounds[2])-diff] = currentMove;
-        } else {
-          diff++;
-        }
-      }
-    }
-    possibleMoves = Arrays.copyOf(possibleMoves, possibleMoves.length-diff);
+    int[][] possibleMoves = ai.getPossibleMoves(this.board);
     // construct children using possible moves
     children = new MCTNode[possibleMoves.length];
     for (int i = 0; i < children.length; ++i) {
@@ -98,13 +85,30 @@ public class MCTNode {
         this.oCaptures,
         this.tCaptures,
         possibleMoves[i],
-        new int[]{0, 2, 1}[this.board[move[0]][move[1]]]
+        1 == this.board[this.move[0]][this.move[1]] ? 2 : 1
       );
     }
   }
 
-  public int simulate(MCTNode nodeToSimulate) {
-    return rand.nextInt(2); // TODO: get rid of this: it's currently a coin flip
+  int simulate(MCTNode nodeToSimulate) {
+    // clone game state for simulations to run on
+    int simBoard[][] = new int[Game.n][Game.n];
+    for (int i = 0; i < Game.n; ++i) {
+      simBoard[i] = this.board[i].clone();
+    }
+    int[] simCaptures = new int[]{nodeToSimulate.oCaptures, nodeToSimulate.tCaptures};
+    int simTurn = 1 == nodeToSimulate.board[nodeToSimulate.move[0]][nodeToSimulate.move[1]] ? 2 : 1;
+    // run the simulations
+    int simWinner = 0;
+    while (simWinner == 0) {
+      int[][] possibleSimMoves = ai.getPossibleMoves(simBoard);
+      int[] simMove = possibleSimMoves[int(random(possibleSimMoves.length))];
+      simCaptures[simTurn-1] += game.isCaptureMove(simBoard, simTurn, simMove);
+      simBoard[simMove[0]][simMove[1]] = simTurn;
+      simWinner = game.winCheck(simBoard, simCaptures[0], simCaptures[1]);
+      simTurn = simTurn == 1 ? 2 : 1;
+    }
+    return simWinner;
   }
 
   public void updateStats(int win) {
@@ -160,5 +164,22 @@ public class GameAI {
       }
     }
     return boundaries;
+  }
+
+  public int[][] getPossibleMoves(int[][] board) {
+    int[] bounds = this.searchField(board);
+    int[][] possibleMoves = new int[((bounds[1]+1)-bounds[0])*((bounds[3]+1)-bounds[2])][2];
+    short diff = 0;
+    for (int i = bounds[0]; i < bounds[1]; ++i) {
+      for (int j = bounds[2]; j < bounds[3]; ++j) {
+        int[] currentMove = {i, j};
+        if (game.isValidMove(board, currentMove)) {
+          possibleMoves[(i-bounds[0])*((bounds[3]+1)-bounds[2])+(j-bounds[2])-diff] = currentMove;
+        } else {
+          diff++;
+        }
+      }
+    }
+    return Arrays.copyOf(possibleMoves, possibleMoves.length-diff);
   }
 }

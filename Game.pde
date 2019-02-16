@@ -136,7 +136,7 @@ class Game {
         println();
         println("computer is thinking");
         memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        move = ai.getComputerMove(pieces, oCaptures, tCaptures, prevMove, 1);
+        move = ai.getComputerMove(pieces, oCaptures, tCaptures, prevMove, turn);
         print("[");print(move[0]);print("] [");print(move[1]);println("]");
         memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         println("memory_before: " + str(memoryBefore/1048576) + "MiB");
@@ -162,7 +162,7 @@ class Game {
   }
 
 
-  int winCheck(int[][] board) {
+  int winCheck(int[][] board, int oCaptures, int tCaptures) {
     // five captures check
     if (oCaptures >= 5) {
       return 1;
@@ -315,7 +315,7 @@ class Game {
 
   void winnerAlert() {
     if (winner == 0) {
-      winner = winCheck(pieces);
+      winner = winCheck(pieces, oCaptures, tCaptures);
     }
     if (winner != 0) {
       color darkC;

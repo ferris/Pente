@@ -1,25 +1,26 @@
 class Game {
-  public static final byte n = 19; // size of board
-  private byte pieces[][] = new byte[n][n]; // board
-  private byte oCaptures = 0; // captures by player 1
-  private byte tCaptures = 0; // captures by player 2
-  private byte turn; // current turn
-  private byte winner = 0; // the winner
+  public static final int n = 19; // size of board
+  private int pieces[][] = new int[n][n]; // board
+  private int oCaptures = 0; // captures by player 1
+  private int tCaptures = 0; // captures by player 2
+  private int turn; // current turn
+  private int[] prevMove; // previous move
+  private int winner = 0; // the winner
   private String mode; // game mode chosen through menu
   private boolean winDelay = false; // prevents accidental return to menu
 
-  public Game(String mode, byte startingPlayer) {
+  public Game(String mode, int startingPlayer) {
     this.mode = mode;
     this.turn = startingPlayer;
   }
 
 
   // BACK END METHODS
-  public byte isCaptureMove(byte[][] board, byte movePlayer, byte[] move) {
+  public int isCaptureMove(int[][] board, int movePlayer, int[] move) {
     // checks if capture move and returns number of captures for tallying
-    byte cCount = 0;
+    int cCount = 0;
 
-    byte unPlayer;
+    int unPlayer;
     if (movePlayer == 1) {
       unPlayer = 2;
     } else {
@@ -111,7 +112,7 @@ class Game {
   }
 
 
-  public boolean isValidMove(byte[][] board, byte[] move) {
+  public boolean isValidMove(int[][] board, int[] move) {
     if (move[0] >= 0 && move[0] < n && move[1] >= 0 && move[1] < n) {
       return (board[move[0]][move[1]] == 0);
     }
@@ -121,21 +122,21 @@ class Game {
 
   public void turnGeneration() {
     boolean newMove = false;
-    byte[] move = new byte[2];
+    int[] move = new int[2];
     if (mode.equals("local")) {
-      byte[] hmc = humanMoveCheck();
-      move = new byte[] {hmc[1], hmc[2]};
+      int[] hmc = humanMoveCheck();
+      move = new int[] {hmc[1], hmc[2]};
       newMove = hmc[0] == 1;
     } else if (mode.equals("single")) {
       if (turn == 1) {
-        byte[] hmc = humanMoveCheck();
-        move = new byte[] {hmc[1], hmc[2]};
+        int[] hmc = humanMoveCheck();
+        move = new int[] {hmc[1], hmc[2]};
         newMove = hmc[0] == 1;
       } else {
         println();
         println("computer is thinking");
         memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        move = ai.getComputerMove(pieces, oCaptures, tCaptures, turn);
+        move = ai.getComputerMove(pieces, oCaptures, tCaptures, prevMove, 1);
         print("[");print(move[0]);print("] [");print(move[1]);println("]");
         memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         println("memory_before: " + str(memoryBefore/1048576) + "MiB");
@@ -145,7 +146,6 @@ class Game {
       }
     }
     if (newMove && isValidMove(pieces, move)) {
-      // a valid move has been generated --> make the move
       pieces[move[0]][move[1]] = turn;
       // update captures and switch whose turn it is
       if (turn == 1) {
@@ -155,11 +155,14 @@ class Game {
         tCaptures += isCaptureMove(pieces, turn, move);
         turn = 1;
       }
+      // update previous move values
+      // a valid move has been generated --> make the move
+      prevMove = move;
     }
   }
 
 
-  byte winCheck(byte[][] board) {
+  int winCheck(int[][] board) {
     // five captures check
     if (oCaptures >= 5) {
       return 1;
@@ -294,14 +297,14 @@ class Game {
     fill(214, 151, 97);
     rect(16, 102, 64, 150, 5);
     fill(16, 24, 60);
-    text(Byte.toString(tCaptures), 32, 120);
-    text(Byte.toString(oCaptures), 64, 120);
-    for (byte i = 0; i < tCaptures; ++i) {
+    text(Integer.toString(tCaptures), 32, 120);
+    text(Integer.toString(oCaptures), 64, 120);
+    for (int i = 0; i < tCaptures; ++i) {
       stroke(10, 120, 140);
       fill(90, 200, 220);
       ellipse(32, 136+(i*25), 20, 20);
     } 
-    for (byte i = 0; i < oCaptures; ++i) {
+    for (int i = 0; i < oCaptures; ++i) {
       stroke(175, 60, 0);
       fill(255, 140, 0);
       ellipse(64, 136+(i*25), 20, 20);
@@ -349,7 +352,7 @@ class Game {
   
   // PRIVATE HELPERS
 
-  private boolean winHelper(byte c1, byte c2, byte c3, byte c4, byte c5) {
+  private boolean winHelper(int c1, int c2, int c3, int c4, int c5) {
     return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;
   }
 }

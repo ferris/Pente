@@ -114,7 +114,7 @@ class GameAI {
     } else if (player == 2) {
       // maximizing player
       short value = Short.MIN_VALUE;
-      for (byte i = 0; i < Game.n; ++i) {
+      /*for (byte i = 0; i < Game.n; ++i) {
         for (byte j = 0; j < Game.n; ++j) {
           byte[] move = {i, j};
           if (game.isValidMove(node.board, move)) {
@@ -126,12 +126,33 @@ class GameAI {
             }
           }
         }
+      }*/
+      short[][] movePool = sortedMovePool(node.board, true);
+      for (short i = 0; i < movePool.length; ++i) {
+        byte[] move = {(byte)(movePool[i][0]), (byte)(movePool[i][1])};
+        ABNode child = new ABNode(node.board, node.oCaptures, node.tCaptures, move, player);
+        value = (short)(max(value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
+        alpha = (short)(max(alpha, value));
+        if (alpha >= beta) {
+          break; // beta cut-off
+        }
       }
+
       return value;
     } else {
       // minimizing player
       short value = Short.MAX_VALUE;
-      for (byte i = 0; i < Game.n; ++i) {
+      short[][] movePool = sortedMovePool(node.board, false);
+      for (short i = 0; i < movePool.length; ++i) {
+        byte[] move = {(byte)(movePool[i][0]), (byte)(movePool[i][1])};
+        ABNode child = new ABNode(node.board, node.oCaptures, node.tCaptures, move, player);
+        value = (short)(min(value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(2))));
+        beta = (short)(min(beta, value));
+        if (alpha >= beta) {
+          break; // alpha cut-off
+        }
+      }
+      /*for (byte i = 0; i < Game.n; ++i) {
         for (byte j = 0; j < Game.n; ++j) {
           byte[] move = {i, j};
           if (game.isValidMove(node.board, move)) {
@@ -143,7 +164,7 @@ class GameAI {
             }
           }
         }
-      }
+      }*/
       return value;
     }
   }

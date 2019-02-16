@@ -84,7 +84,6 @@ class GameAI {
     } else if (player == 2) {
       bestValue = currentMax;
     }
-    //List<byte[]> suitableMoves = new ArrayList<byte[]>();
     byte[] bestMove = new byte[2];
     for (short i = 0; i < movePool.length; ++i) {
       if (movePool[i][2] == bestValue) {
@@ -114,19 +113,6 @@ class GameAI {
     } else if (player == 2) {
       // maximizing player
       short value = Short.MIN_VALUE;
-      /*for (byte i = 0; i < Game.n; ++i) {
-        for (byte j = 0; j < Game.n; ++j) {
-          byte[] move = {i, j};
-          if (game.isValidMove(node.board, move)) {
-            ABNode child = new ABNode(node.board, node.oCaptures, node.tCaptures, move, player);
-            value = (short)(max(value, alphabeta(child, byte(currentDepth-1), alpha, beta, byte(1))));
-            alpha = (short)(max(alpha, value));
-            if (alpha >= beta) {
-              break; // beta cut-off
-            }
-          }
-        }
-      }*/
       short[][] movePool = sortedMovePool(node.board, true);
       for (short i = 0; i < movePool.length; ++i) {
         byte[] move = {(byte)(movePool[i][0]), (byte)(movePool[i][1])};
@@ -170,17 +156,18 @@ class GameAI {
   }
 
   short[][] sortedMovePool(byte[][] board, boolean highToLow) {
-    short[][] fiboBoard = fibonacciValueBoard(board); //<>//
-    short[][] movePool = new short[Game.n*Game.n][3];
+    byte[] bounds = searchField(board);
+    short[][] fiboBoard = fibonacciValueBoard(board);
+    short[][] movePool = new short[((bounds[1]+1)-bounds[0])*((bounds[3]+1)-bounds[2])][3];
     short diff = 0;
-    for (byte i = 0; i < Game.n; ++i) {
-      for (byte j = 0; j < Game.n; ++j) {
+    for (byte i = bounds[0]; i < bounds[1]; ++i) {
+      for (byte j = bounds[2]; j < bounds[3]; ++j) {
         if (fiboBoard[i][j] == Short.MIN_VALUE && board[i][j] != 0) {
           diff++;
         } else {
-          movePool[(i*Game.n)+j-diff][0] = i;
-          movePool[(i*Game.n)+j-diff][1] = j;
-          movePool[(i*Game.n)+j-diff][2] = fiboBoard[i][j];
+          movePool[(i-bounds[0])*((bounds[3]+1)-bounds[2])+(j-bounds[2])-diff][0] = i;
+          movePool[(i-bounds[0])*((bounds[3]+1)-bounds[2])+(j-bounds[2])-diff][1] = j;
+          movePool[(i-bounds[0])*((bounds[3]+1)-bounds[2])+(j-bounds[2])-diff][2] = fiboBoard[i][j];
         }
       }
     }
@@ -201,7 +188,7 @@ class GameAI {
       heapifyPool(movePool, i, (short)(0));
     }
     if (highToLow) { // reverse list
-      for (short i = 0; i < movePool.length/2; i++) {
+      for (short i = 0; i < movePool.length; i++) {
         short[] temp = movePool[i];
         movePool[i] = movePool[movePool.length-i-1];
         movePool[movePool.length-i-1] = temp;
@@ -263,26 +250,29 @@ class GameAI {
     return (short)(retSum/totalPieces);
   }
 
-  short[][] fibonacciValueBoard(byte[][] board) {
-    byte top = Game.n;
-    byte bottom = 0;
-    byte left = Game.n;
-    byte right = 0;
+  byte[] searchField(byte[][] board) {
+    // {top, bottom, left, right}
+    byte[] boundaries = new byte[] {Game.n, 0, Game.n, 0};
     for (byte i = 0; i < Game.n; ++i) {
       for (byte j = 0; j < Game.n; ++j) {
         if (board[i][j] != 0) {
           // there is a piece at [i][j]
-          top = (byte)(min(top, max(0, i-4)));
-          bottom = (byte)(max(bottom, min(Game.n-1, i+4)));
-          left = (byte)(min(left, max(0, j-4)));
-          right = (byte)(max(right, min(Game.n-1, j+4)));
+          boundaries[0] = (byte)(min(boundaries[0], max(0, i-4)));
+          boundaries[1] = (byte)(max(boundaries[1], min(Game.n-1, i+4)));
+          boundaries[2] = (byte)(min(boundaries[2], max(0, j-4)));
+          boundaries[3] = (byte)(max(boundaries[3], min(Game.n-1, j+4)));
         }
       }
     }
+    return boundaries;
+  }
+
+  short[][] fibonacciValueBoard(byte[][] board) {
+    byte[] boundaries = searchField(board);
     short[][][] valueList = new short[2][Game.n][Game.n]; // new value array of same size as board
     // cycle through search field
-    for (byte i = top; i <= bottom; ++i) {
-      for (byte j = left; j <= right; ++j) {
+    for (byte i = boundaries[0]; i <= boundaries[1]; ++i) {
+      for (byte j = boundaries[2]; j <= boundaries[3]; ++j) {
         // if there is a piece then do not check
         if (board[i][j] != 0) {
           // a negative one represents a piece
@@ -290,10 +280,10 @@ class GameAI {
           valueList[1][i][j] = Short.MIN_VALUE;
           continue;
         } else {
-          byte k_LowerBound = (byte)(max(top, i-4));
-          byte k_UpperBound = (byte)(min(bottom, i+4) +1);
-          byte l_LowerBound = (byte)(max(left, j-4));
-          byte l_UpperBound = (byte)(min(right, j+4) +1);
+          byte k_LowerBound = (byte)(max(boundaries[0], i-4));
+          byte k_UpperBound = (byte)(min(boundaries[1], i+4) +1);
+          byte l_LowerBound = (byte)(max(boundaries[2], j-4));
+          byte l_UpperBound = (byte)(min(boundaries[3], j+4) +1);
           for (byte k = k_LowerBound; k < k_UpperBound; ++k) {
             // vertical (|)
             if (board[k][j] != 0) {
@@ -330,7 +320,7 @@ class GameAI {
           short tVal = valueList[1][i][j];
           short tFibb = (short)(floor((pow(((1+sqrt(5))/2.0), tVal)-pow(((1-sqrt(5))/2.0),tVal))/sqrt(5)));
           short oFibb = (short)(floor((pow(((1+sqrt(5))/2.0), oVal)-pow(((1-sqrt(5))/2.0),oVal))/sqrt(5)));
-          comboList[i][j] = (short)(tFibb - oFibb);
+          comboList[i][j] = (short)(tFibb + oFibb);
         }
       }
     }

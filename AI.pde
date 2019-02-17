@@ -14,12 +14,24 @@ public class GameAI {
     int timesCalculated = 0;
     MCTNode currentNode = root;
     while (millis() - beginTime < calculationTime) {
+      //
+      if (currentNode.getGameState().getPreviousMove()[0] == 0 && currentNode.getGameState().getPreviousMove()[1] == 4) {
+        if (currentNode.getGameState().getPlayerOfCurrentTurn() == 1 && currentNode.getParent().getParent() == null) {
+          println(timesCalculated + "[05]");
+          println("getTotalSims: " + currentNode.getTotalSimulations());
+          println("getTotalVal : " + currentNode.getTotalValue());
+        }
+      }
+      if (currentNode.getParent() != null && currentNode.getParent().getParent() == null) {
+        print("**[");print(currentNode.getGameState().getPreviousMove()[0]);print("] [");print(currentNode.getGameState().getPreviousMove()[1]);println("]");
+      }
+      //
       currentNode = treePolicy(root);
       float winnerEstimate = defaultPolicy(currentNode.getGameState());
       backUp(currentNode, winnerEstimate);
       timesCalculated += 1;
     }
-    MCTNode bestChild = bestChild(root, 0);
+    MCTNode bestChild = bestChild(root, 0); //<>//
     // get best child and return
     int timeTaken = millis() - beginTime;
     println("Best child value: " + bestChild.getTotalValue());
@@ -37,6 +49,7 @@ public class GameAI {
         node = bestChild(node, EXPLORATION_PARAMETER);
       }
     }
+    println("oof");
     return node;
   }
 
@@ -63,14 +76,18 @@ public class GameAI {
     state = state.getDuplicate();
     while (state.getWinner() == 0) {
       int[][] possibleMoves = state.getPossibleMoves();
-      state.playMove(possibleMoves[int(random(possibleMoves.length))]);
+      if (possibleMoves.length > 0) {
+        state.playMove(possibleMoves[int(random(possibleMoves.length))]);
+      } else {
+        break;
+      }
     }
     return state.getWinner();
   }
 
   private void backUp(MCTNode node, float winnerEstimate) {
     while (node != null) {
-      float valueChange = winnerEstimate == node.getGameState().getPlayerOfCurrentTurn() ? 0 : 1;
+      float valueChange = (winnerEstimate == node.getGameState().getPlayerOfCurrentTurn()) ? 0 : 1;
       node.updateTotals(1, valueChange);
       node = node.getParent();
     }
@@ -101,6 +118,9 @@ public class MCTNode {
     int[][] possibleMoves = state.getPossibleMoves();
     children = new MCTNode[possibleMoves.length];
     for (int i = 0; i < children.length; ++i) {
+      if (possibleMoves[i][0]==0 && possibleMoves[i][1] == 4 && this.getGameState().getBoard()[0][3] == 1 && this.getGameState().getBoard()[0][2] == 1 && this.getGameState().getBoard()[0][1] == 1 && this.getGameState().getPlayerOfCurrentTurn() == 1) {
+        println("fiver"); //<>//
+      }
       children[i] = new MCTNode(this);
       children[i].getGameState().playMove(possibleMoves[i]);
     }

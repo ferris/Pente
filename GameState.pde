@@ -33,6 +33,9 @@ class GameState {
 
   public void playMove(int[] move) {
     if (isValidMove(move)) {
+      if (move[0]==0 && move[1] == 4 && board[0][3] == 1 && board[0][2] == 1 && board[0][1] == 1 && board[0][0] == 1 && turnNum == 1) {
+        print("aloha"); //<>//
+      }
       board[move[0]][move[1]] = turnNum;
       captures[turnNum-1] += capturesInMove(turnNum, move);
       turnNum = 3 - turnNum;
@@ -48,48 +51,50 @@ class GameState {
     return false;
   }
 
-  public int winCheck() {
+  int winCheck() {
     // five captures check
     for (int i = 0; i < captures.length; ++i) {
       if (captures[i] >= 5) {
         return i+1;
       }
     }
-    // scan through board in 5x5 blocks
+    // column check
+    for (int r = 0; r < BOARD_SIZE - 4; ++r) {
+      for (int c = 0; c < BOARD_SIZE; ++c) {
+        if (winHelper(board[r][c], board[r+1][c], board[r+2][c], board[r+3][c], board[r+4][c])) {
+          return board[r][c];
+        }
+      }
+    }
+    // row check
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+      for (int c = 0; c < BOARD_SIZE - 4; ++c) {
+        if (winHelper(board[r][c], board[r][c+1], board[r][c+2], board[r][c+3], board[r][c+4])) {
+          return board[r][c];
+        }
+      }
+    }
+    // down diagonal
     for (int r = 0; r < BOARD_SIZE - 4; ++r) {
       for (int c = 0; c < BOARD_SIZE - 4; ++c) {
-        int centerVal = board[r+2][c+2];
-        // check if a piece is in center of the scan area
-        if (centerVal == 0) {
-          continue;
+        if (winHelper(board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3], board[r+4][c+4])) {
+          return board[r][c];
         }
-        // vertical check (|)
-        for (int i = 0; board[r+i][c] == centerVal && i < 5; ++i) {
-          if (i == 4) {
-            return centerVal;
-          }
-        }
-        // horizontal check (-)
-        for (int i = 0; board[r][c+i] == centerVal && i < 5; ++i) {
-          if (i == 4) {
-            return centerVal;
-          }
-        }
-        // back diagonal (\)
-        for (int i = 0; board[r+i][c+i] == centerVal && i < 5; ++i) {
-          if (i == 4) {
-            return centerVal;
-          }
-        }
-        // fowards diagonal (/)
-        for (int i = 0; board[r+4-i][c+i] == centerVal && i < 5; ++i) {
-          if (i == 4) {
-            return centerVal;
-          }
+      }
+    }
+    // up diagonal
+    for (int r = 4; r < BOARD_SIZE; ++r) {
+      for (int c = 0; c < BOARD_SIZE - 4; ++c) {
+        if (winHelper(board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3], board[r-4][c+4])) {
+          return board[r][c];
         }
       }
     }
     return 0;
+  }
+
+  private boolean winHelper(int c1, int c2, int c3, int c4, int c5) {
+    return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;
   }
 
   public int capturesInMove(int movePlayer, int[] move) {

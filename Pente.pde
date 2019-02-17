@@ -39,7 +39,9 @@ void draw() {
   } else if (room.equals("game")) {
     game.drawBoard();
     game.drawPieces();
-    game.turnGeneration();
+    if (game.winner == 0) {
+      game.turnGeneration();
+    }
     game.drawTurnIndication();
     game.drawCaptureIndication();
     game.winnerAlert();

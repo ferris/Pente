@@ -40,7 +40,7 @@ void modeMenu() {
   // single player button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
     game = new Game("single", 1);
-    ai = new GameAI(3000);
+    ai = new GameAI(5000);
     room = "game";
   }
   // local multiplayer button

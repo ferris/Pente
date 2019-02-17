@@ -3,6 +3,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+
 class GameState {
   public static final int BOARD_SIZE = 19; // size of board
   private int[][] board = new int[BOARD_SIZE][BOARD_SIZE]; // board
@@ -10,6 +14,18 @@ class GameState {
   private int turnNum; // current turn
   private int[] prevMove; // previous move
   private int winner = 0; // the winner
+
+  public GameState(int[][] board, int[] captures, int turnNum, int[] prevMove, int winner) {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+      for (int j = 0; j < BOARD_SIZE; ++j) {
+        this.board[i][j] = board[i][j];
+      }
+    }
+    this.captures = captures.clone();
+    this.turnNum = turnNum;
+    this.prevMove = prevMove;
+    this.winner = winner;
+  }
 
   public GameState(int startingPlayer) {
     turnNum = startingPlayer;
@@ -79,20 +95,24 @@ class GameState {
   public int capturesInMove(int movePlayer, int[] move) {
     // checks if capture move and returns number of captures for tallying
     int capCount = 0;
-    int unPlayer = movePlayer - 2;
+    int unPlayer = 3 - movePlayer;
     int[] sequence = new int[]{movePlayer, unPlayer, unPlayer, movePlayer};
     // check horizontal captures (-)
     if (move[1] > 2) {
       for (int i = 0; i < sequence.length && board[move[0]][move[1]-i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]][move[1]-1] = 0;
+          board[move[0]][move[1]-2] = 0;
         }
       }
     }
-    if (move[1] > BOARD_SIZE - 3) {
+    if (move[1] < BOARD_SIZE - 3) {
       for (int i = 0; i < sequence.length && board[move[0]][move[1]+i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]][move[1]+1] = 0;
+          board[move[0]][move[1]+2] = 0;
         }
       }
     }
@@ -101,13 +121,17 @@ class GameState {
       for (int i = 0; i < sequence.length && board[move[0]-i][move[1]] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]-1][move[1]] = 0;
+          board[move[0]-2][move[1]] = 0;
         }
       }
     }
-    if (move[0] > BOARD_SIZE - 3) {
+    if (move[0] < BOARD_SIZE - 3) {
       for (int i = 0; i < sequence.length && board[move[0]+i][move[1]] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]+1][move[1]] = 0;
+          board[move[0]+2][move[1]] = 0;
         }
       }
     }
@@ -116,6 +140,8 @@ class GameState {
       for (int i = 0; i < sequence.length && board[move[0]-i][move[1]-i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]-1][move[1]-1] = 0;
+          board[move[0]-2][move[1]-2] = 0;
         }
       }
     }
@@ -123,6 +149,8 @@ class GameState {
       for (int i = 0; i < sequence.length && board[move[0]+i][move[1]+i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]+1][move[1]+1] = 0;
+          board[move[0]+2][move[1]+2] = 0;
         }
       }
     }
@@ -131,6 +159,8 @@ class GameState {
       for (int i = 0; i < sequence.length && board[move[0]-i][move[1]+i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]-1][move[1]+1] = 0;
+          board[move[0]-2][move[1]+2] = 0;
         }
       }
     }
@@ -138,6 +168,8 @@ class GameState {
       for (int i = 0; i < sequence.length && board[move[0]+i][move[1]-i] == sequence[i]; ++i) {
         if (i == sequence.length - 1) {
           capCount++;
+          board[move[0]+1][move[1]-1] = 0;
+          board[move[0]+2][move[1]-2] = 0;
         }
       }
     }
@@ -145,16 +177,7 @@ class GameState {
   }
 
   public GameState getDuplicate() {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream oos = new ObjectOutputStream(bos);
-    oos.writeObject(this);
-    oos.flush();
-    oos.close();
-    bos.close();
-    byte[] byteData = bos.toByteArray();
-    ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
-    GameState dup = (GameState) new ObjectInputStream(bais).readObject();
-    return dup;
+    return new GameState(board, captures, turnNum, prevMove, winner);
   }
 
   public int[][] getPossibleMoves() {

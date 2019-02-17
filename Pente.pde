@@ -16,6 +16,14 @@ $$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
   Written by Ferris Linde
 */
 
+/*
+REFERENCES:
+- https://medium.com/@quasimik/monte-carlo-tree-search-applied-to-letterpress-34f41c86e238
+- https://www.baeldung.com/java-monte-carlo-tree-search
+- http://mcts.ai/pubs/mcts-survey-master.pdf
+- https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
+*/
+
 String version = "Alpha 2.1.0";
 String room = "mainMenu";
 boolean mouseReleased = false;
@@ -39,7 +47,7 @@ void draw() {
   } else if (room.equals("game")) {
     game.drawBoard();
     game.drawPieces();
-    if (game.winner == 0) {
+    if (!game.gameIsOver()) {
       game.turnGeneration();
     }
     game.drawTurnIndication();

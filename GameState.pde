@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Arrays;
 
 class GameState {
-  public static final int BOARD_SIZE = 19; // size of board
+  public static final int BOARD_SIZE = 9; // size of board
   private int[][] board = new int[BOARD_SIZE][BOARD_SIZE]; // board
   private int[] captures = new int[2];
   private int turnNum; // current turn
@@ -34,7 +34,7 @@ class GameState {
   public void playMove(int[] move) {
     if (isValidMove(move)) {
       if (move[0]==0 && move[1] == 4 && board[0][3] == 1 && board[0][2] == 1 && board[0][1] == 1 && board[0][0] == 1 && turnNum == 1) {
-        print("aloha"); //<>//
+        print("aloha");
       }
       board[move[0]][move[1]] = turnNum;
       captures[turnNum-1] += capturesInMove(turnNum, move);
@@ -95,6 +95,17 @@ class GameState {
 
   private boolean winHelper(int c1, int c2, int c3, int c4, int c5) {
     return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;
+  }
+
+  public boolean isTie() {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+      for (int j = 0; j < BOARD_SIZE; ++j) {
+        if (board[i][j] == 0) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   public int capturesInMove(int movePlayer, int[] move) {

@@ -73,7 +73,7 @@ public class GameAI {
   private MCTNode bestChild(MCTNode node, float exploreParam) {
     MCTNode selected = node;
     MCTNode[] children = node.getChildren();
-    float bestValue = Float.MIN_VALUE;
+    float bestValue = -1 * Float.MAX_VALUE;
     for (MCTNode child : children) {
       float uctValue = child.getUCTValue(exploreParam);
       if (uctValue > bestValue) {

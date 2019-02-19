@@ -6,71 +6,78 @@ public class GameAI {
     this.calculationTime = calculationTime;
   }
 
+  private float MCTSSolver(MCTNode n) {
+    if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
+      return Float.POSITIVE_INFINITY;
+    } else if (n.getGameState().getWinner() == 3 - n.getGameState().getPlayerOfCurrentTurn()) {
+      return Float.NEGATIVE_INFINITY;
+    }
+    MCTNode bestChild;
+    float delta;
+    if (n.isLeaf()) {
+      bestChild = expand(n);
+    } else {
+      bestChild = select(n, EXPLORATION_PARAMETER);
+    }
+    n.addOneToVisits();
+    if (bestChild.getTotalValue() != Float.POSITIVE_INFINITY && bestChild.getTotalValue() != Float.NEGATIVE_INFINITY) {
+      if (bestChild.getTotalVisits() == 0) {
+        delta = -1 * playOut(bestChild);
+        n.addToValue(delta);
+        return delta;
+      } else {
+        delta = -1 * MCTSSolver(bestChild); //<>//
+      }
+    } else {
+      delta = bestChild.getTotalValue();
+    }
+    if (delta == Float.POSITIVE_INFINITY) {
+      n.setValue(Float.NEGATIVE_INFINITY);
+    } else if (delta == Float.NEGATIVE_INFINITY) {
+      for (MCTNode child : n.getChildren()) {
+        if (child.getTotalValue() != delta) {
+          delta = -1;
+          n.addToValue(delta);
+          return delta;
+        }
+      }
+      n.setValue(Float.POSITIVE_INFINITY);
+      return delta;
+    }
+    n.addToValue(delta);
+    return delta;
+  }
+
   public int[] getComputerMove(GameState currentGameState) {
     int beginTime = millis();
     // create tree
     MCTNode root = new MCTNode(currentGameState);
     // analyze within time
-    int timesCalculated = 0;
-    MCTNode currentNode = root;
+    int timesRun = 0;
     while (millis() - beginTime < calculationTime) {
-      //print("loop#1");
-      //
-      if (currentNode.getGameState().getPreviousMove()[0] == 0 && currentNode.getGameState().getPreviousMove()[1] == 4) {
-        if (currentNode.getGameState().getPlayerOfCurrentTurn() == 1 && currentNode.getParent().getParent() == null) {
-          println(timesCalculated + "[05]");
-          println("getTotalSims: " + currentNode.getTotalSimulations());
-          println("getTotalVal : " + currentNode.getTotalValue());
-        }
+      float rootVal = MCTSSolver(root);
+      // break if proven win or loss
+      if (rootVal == Float.POSITIVE_INFINITY || rootVal == Float.NEGATIVE_INFINITY) {
+        print("INSTANT");
+        break;
       }
-      if (currentNode.getParent() != null && currentNode.getParent().getParent() == null) {
-        print("**[");print(currentNode.getGameState().getPreviousMove()[0]);print("] [");print(currentNode.getGameState().getPreviousMove()[1]);println("]");
-      }
-      //
-      currentNode = treePolicy(root);
-      float winnerEstimate = defaultPolicy(currentNode.getGameState());
-      backUp(currentNode, winnerEstimate);
-      timesCalculated += 1;
+      timesRun++;
     }
-    MCTNode bestChild = bestChild(root, 0);
     // get best child and return
+    MCTNode sChild = secureChild(root, 1); //<>//
     int timeTaken = millis() - beginTime;
-    println("Best child value: " + bestChild.getTotalValue());
-    println("Best child simulations: " + bestChild.getTotalSimulations());
-    println("Percent chance of winning: " + nfc(100*bestChild.getTotalValue()/bestChild.getTotalSimulations(), 2) + "%");
-    println("Calculated " + timesCalculated + "games in " + timeTaken + " ms");
-    return bestChild.state.getPreviousMove();
-  }
-
-  private MCTNode treePolicy(MCTNode node) {
-    //
-    if (node == null) {
-      println("NULL FOUND"); //<>//
-    }
-    int timesTraversed = 0;
-    //
-    while (!node.isTerminal()) {
-      if (timesTraversed > 1000) {
-        println("shit"); //<>//
-      }
-      //print("loop#2");
-      if (node.isLeaf()) {
-        return expand(node);
-      } else {
-        node = bestChild(node, EXPLORATION_PARAMETER);
-      }
-      timesTraversed++;
-    }
-    println("oof");
-    return node;
+    println("Best child value: " + sChild.getTotalValue());
+    println("Best child simulations: " + sChild.getTotalVisits());
+    println("Ran " + timesRun + " times in " + timeTaken + " ms");
+    return sChild.getGameState().getPreviousMove();
   }
 
   private MCTNode expand(MCTNode node) {
     node.generateChildren();
-    return bestChild(node, EXPLORATION_PARAMETER);
+    return select(node, EXPLORATION_PARAMETER);
   }
 
-  private MCTNode bestChild(MCTNode node, float exploreParam) {
+  private MCTNode select(MCTNode node, float exploreParam) {
     MCTNode selected = node;
     MCTNode[] children = node.getChildren();
     float bestValue = -1 * Float.MAX_VALUE;
@@ -84,8 +91,23 @@ public class GameAI {
     return selected;
   }
 
-  private float defaultPolicy(GameState stateToSimulate) {
-    GameState state = stateToSimulate.getDuplicate();
+  private MCTNode secureChild(MCTNode rootNode, float aParam) {
+    MCTNode selected = null;
+    MCTNode[] children = rootNode.getChildren();
+    float bestValue = -1 * Float.MAX_VALUE;
+    for (MCTNode child : children) {
+      float scValue = child.getSCValue(aParam);
+      if (scValue > bestValue) {
+        bestValue = scValue;
+        selected = child;
+      }
+    }
+    return selected;
+  }
+
+  private float playOut(MCTNode node) {
+    node.addOneToVisits();
+    GameState state = node.getGameState().getDuplicate();
     while (state.getWinner() == 0 || state.isTie()) {
       //print("loop#3");
       int[][] possibleMoves = state.getPossibleMoves();
@@ -95,16 +117,9 @@ public class GameAI {
         break;
       }
     }
-    return state.getWinner();
-  }
-
-  private void backUp(MCTNode node, float winnerEstimate) {
-    while (node != null) {
-      //print("loop#4");
-      float valueChange = (winnerEstimate == node.getGameState().getPlayerOfCurrentTurn()) ? -1 : 1;
-      node.updateTotals(1, valueChange);
-      node = node.getParent();
-    }
+    float delta = (state.getWinner() == node.getGameState().getPlayerOfCurrentTurn()) ? 1 : -1;
+    node.addToValue(delta);
+    return delta;
   }
 }
 
@@ -145,8 +160,12 @@ public class MCTNode {
     float uctValue = random(1) * epsilon;
     // balance exploration and exploitation by applying UCT1 (Upper Confidence Bound 1 applied to trees)
     uctValue += totalValue / (numVisits + epsilon);
-    uctValue += exploreParam * sqrt(log(parent.getTotalSimulations() + 1) / (numVisits + epsilon));
+    uctValue += exploreParam * sqrt(log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
     return uctValue;
+  }
+
+  public float getSCValue(float aParam) {
+    return totalValue + (aParam / sqrt(numVisits));
   }
 
   public GameState getGameState() {
@@ -166,7 +185,19 @@ public class MCTNode {
     totalValue += totalValueChange;
   }
 
-  public float getTotalSimulations() {
+  public void addOneToVisits() {
+    numVisits++;
+  }
+
+  public void addToValue(float num) {
+    totalValue += num;
+  }
+
+  public void setValue(float num) {
+    totalValue = num;
+  }
+
+  public float getTotalVisits() {
     return numVisits;
   }
 
@@ -176,9 +207,5 @@ public class MCTNode {
 
   private boolean isLeaf() {
     return children == null;
-  }
-  
-  private boolean isTerminal() {
-    return state.getWinner() != 0 || state.isTie();
   }
 }

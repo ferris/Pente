@@ -33,11 +33,10 @@ class Game {
             println("computer is thinking");
             long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             move = ai.getComputerMove(gameState);
-            print("[");print(move[0]);print("] [");print(move[1]);println("]");
             long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            println("memory_before: " + str(memoryBefore/1048576) + "MiB");
-            println("memory_after: " + str(memoryAfter/1048576) + "MiB");
-            println("memory_change: " + str((memoryAfter-memoryBefore)/1048576) + "MiB");
+            //println("memory_before: " + str(memoryBefore/1048576) + "MiB");
+            //println("memory_after: " + str(memoryAfter/1048576) + "MiB");
+            //println("memory_change: " + str((memoryAfter-memoryBefore)/1048576) + "MiB");
             newMove = true;
           }
           moveDelay = true;

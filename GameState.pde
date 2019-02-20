@@ -1,8 +1,3 @@
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -33,9 +28,6 @@ class GameState {
 
   public void playMove(int[] move) {
     if (isValidMove(move)) {
-      if (move[0]==0 && move[1] == 4 && board[0][3] == 1 && board[0][2] == 1 && board[0][1] == 1 && board[0][0] == 1 && turnNum == 1) {
-        print("aloha");
-      }
       board[move[0]][move[1]] = turnNum;
       captures[turnNum-1] += capturesInMove(turnNum, move);
       turnNum = 3 - turnNum;

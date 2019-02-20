@@ -1,12 +1,10 @@
 public class MCTNode {
-  // general Monte Carlo Tree Search attributes
-  private static final float epsilon = 1e-6;
+  private static final float epsilon = 1e-6; // used to prevent division by zero
   private MCTNode parent;
   private MCTNode[] children;
   private float numVisits;
   private float totalValue;
-  // State of this node
-  private GameState state;
+  private GameState state; // State of this node
 
   public MCTNode(GameState state) {
     this.parent = null;
@@ -32,12 +30,12 @@ public class MCTNode {
     float uctValue = random(1) * epsilon;
     // balance exploration and exploitation by applying UCT1 (Upper Confidence Bound 1 applied to trees)
     uctValue += totalValue / (numVisits + epsilon);
-    uctValue += exploreParam * sqrt(log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
+    uctValue += sqrt(exploreParam * log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
     return uctValue;
   }
 
   public float getSCValue(float aParam) {
-    return totalValue + (aParam / sqrt(numVisits));
+    return (totalValue / (numVisits + epsilon)) + (aParam / (sqrt(numVisits) + epsilon));
   }
 
   public GameState getGameState() {

@@ -1,5 +1,5 @@
 public class GameAI {
-  private static final float EXPLORATION_PARAMETER = 1.41421; // sqrt(2)
+  private static final float EXPLORATION_PARAMETER = 2;
   private int calculationTime;
 
   public GameAI(int calculationTime) {

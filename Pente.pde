@@ -49,10 +49,10 @@ void draw() {
     modeMenu();
   } else if (room.equals("game")) {
     game.drawBoard();
-    game.drawPieces();
     if (!game.gameIsOver()) {
       game.turnGeneration();
     }
+    game.drawPieces();
     game.drawTurnIndication();
     game.drawCaptureIndication();
     game.winnerAlert();

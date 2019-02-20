@@ -5,7 +5,10 @@ class Game {
   private String mode; // game mode chosen through menu
   private boolean winDelay = false; // prevents accidental return to menu
   private boolean moveDelay = false; // allows a frame to be drawn before move chosen
-
+  
+  // debug purposes
+  MCTNode sc;
+  // debug end
   public Game(String mode, int startingPlayer) {
     this.mode = mode;
     this.gameState = new GameState(startingPlayer);
@@ -25,14 +28,15 @@ class Game {
             int[] hmc = humanMoveCheck();
             move = new int[] {hmc[1], hmc[2]};
             newMove = hmc[0] == 1;
+          } else {
+            moveDelay = true; // TODO: get rid of dumb debug things here and in Pente file (returning sc instead of move, etc) //<>//
           }
-          moveDelay = true;
         } else {
           if (moveDelay) {
             println();
             println("computer is thinking");
             long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            MCTNode sc = ai.getComputerMove(gameState);
+            sc = ai.getComputerMove(gameState);
             move = sc.getGameState().getPreviousMove();
             //move = ai.getComputerMove(gameState);
             long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();

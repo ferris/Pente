@@ -22,9 +22,6 @@ public class MCTNode {
     int[][] possibleMoves = state.getPossibleMoves();
     children = new MCTNode[possibleMoves.length];
     for (int i = 0; i < children.length; ++i) {
-      if (possibleMoves[i][0]==0 && possibleMoves[i][1] == 4 && this.getGameState().getBoard()[0][3] == 1 && this.getGameState().getBoard()[0][2] == 1 && this.getGameState().getBoard()[0][1] == 1 && this.getGameState().getPlayerOfCurrentTurn() == 1) {
-        println("fiver");
-      }
       children[i] = new MCTNode(this);
       children[i].getGameState().playMove(possibleMoves[i]);
     }

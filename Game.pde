@@ -32,7 +32,9 @@ class Game {
             println();
             println("computer is thinking");
             long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            move = ai.getComputerMove(gameState);
+            MCTNode sc = ai.getComputerMove(gameState);
+            move = sc.getGameState().getPreviousMove();
+            //move = ai.getComputerMove(gameState);
             long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             //println("memory_before: " + str(memoryBefore/1048576) + "MiB");
             //println("memory_after: " + str(memoryAfter/1048576) + "MiB");

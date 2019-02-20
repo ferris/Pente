@@ -5,7 +5,7 @@ void mainMenu() {
   rect(150, 300, 500, 100, 50);
   textAlign(CENTER);
   textSize(11);
-  text(version, 765, 10);
+  text(version, 730, 10);
   textSize(118);
   text("Pente", 400, 200);
   fill(236, 240, 241);

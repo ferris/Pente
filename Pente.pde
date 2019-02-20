@@ -24,7 +24,7 @@ REFERENCES:
 - https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
 */
 
-String version = "Alpha 2.1.0";
+String version = "Monte Carlo Tree Solver";
 String room = "mainMenu";
 boolean mouseReleased = false;
 Game game;
@@ -35,8 +35,11 @@ void setup() {
   frameRate(60);
   // Text mode "center"
   textAlign(CENTER);
-
   size(800, 600);
+  // FOR DEBUGING PURPOSES:
+  game = new Game("single", 1);
+  ai = new GameAI(5000);
+  room = "game";
 }
 
 void draw() {

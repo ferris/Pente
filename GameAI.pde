@@ -6,7 +6,8 @@ public class GameAI {
     this.calculationTime = calculationTime;
   }
   
-  public int[] getComputerMove(GameState currentGameState) {
+  //public int[] getComputerMove(GameState currentGameState) {
+  public MCTNode getComputerMove(GameState currentGameState) {
     int beginTime = millis();
     // create tree
     MCTNode root = new MCTNode(currentGameState);
@@ -17,7 +18,7 @@ public class GameAI {
       float turnValue = MCTSSolver(root);
       // break if proven win or loss
       if (turnValue == Float.POSITIVE_INFINITY || turnValue == Float.NEGATIVE_INFINITY) {
-        print("INSTANT"); //<>//
+        println("INSTANT = " + turnValue);
         break;
       }
       timesRun++;
@@ -29,14 +30,15 @@ public class GameAI {
     println("Best child simulations: " + sChild.getTotalVisits());
     println("Ran " + timesRun + " times in " + timeTaken + " ms");
     print("[");print(sChild.getGameState().getPreviousMove()[0]);print("] [");print(sChild.getGameState().getPreviousMove()[1]);println("]");
-    return sChild.getGameState().getPreviousMove();
+    //return sChild.getGameState().getPreviousMove();
+    return sChild;
   }
 
   private float MCTSSolver(MCTNode n) {
     if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
-      return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run) //<>//
+      return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run)
     } else if (n.getGameState().getWinner() == 3 - n.getGameState().getPlayerOfCurrentTurn()) {
-      n.setValue(Float.POSITIVE_INFINITY); //<>//
+      n.setValue(Float.POSITIVE_INFINITY);
       return Float.NEGATIVE_INFINITY;
     }
     MCTNode bestChild;

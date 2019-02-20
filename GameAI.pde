@@ -37,7 +37,7 @@ public class GameAI {
   private float MCTSSolver(MCTNode n) {
     if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
       return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run)
-    } else if (n.getGameState().getWinner() == 3 - n.getGameState().getPlayerOfCurrentTurn()) {
+    } else if (n.getGameState().getWinner() == (3 - n.getGameState().getPlayerOfCurrentTurn())) {
       n.setValue(Float.POSITIVE_INFINITY);
       return Float.NEGATIVE_INFINITY;
     }
@@ -101,10 +101,20 @@ public class GameAI {
     node.addOneToVisits();
     GameState state = node.getGameState().getDuplicate();
     while (state.getWinner() == 0 || state.isTie()) {
-      //print("loop#3");
-      int[][] possibleMoves = state.getPossibleMoves();
-      if (possibleMoves.length > 0) {
-        state.playMove(possibleMoves[int(random(possibleMoves.length))]);
+      int[][] movePool = state.getMovePool();
+      if (movePool.length > 0) {
+        // get two possible moves, choose the one with the greater connection value
+        int[] moveOption1 = movePool[int(random(movePool.length))];
+        int[] moveOption2 = movePool[int(random(movePool.length))];
+        int[] move = new int[2];
+        if (moveOption1[2] >= moveOption2[2]) {
+          move[0] = moveOption1[0];
+          move[1] = moveOption1[1];
+        } else {
+          move[0] = moveOption2[0];
+          move[1] = moveOption2[1];
+        }
+        state.playMove(move);
       } else {
         break;
       }

@@ -17,7 +17,7 @@ public class MCTNode {
   }
 
   public void generateChildren() {
-    int[][] possibleMoves = state.getPossibleMoves();
+    int[][] possibleMoves = state.getSortedMovePool();
     children = new MCTNode[possibleMoves.length];
     for (int i = 0; i < children.length; ++i) {
       children[i] = new MCTNode(this);

@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Arrays;
 
 class GameState {
-  public static final int BOARD_SIZE = 9; // size of board
+  public static final int BOARD_SIZE = 19; // size of board
   private int[][] board = new int[BOARD_SIZE][BOARD_SIZE]; // board
   private int[] captures = new int[2];
   private int turnNum; // current turn
@@ -43,6 +43,7 @@ class GameState {
     return false;
   }
 
+
   int winCheck() {
     // five captures check
     for (int i = 0; i < captures.length; ++i) {
@@ -50,34 +51,40 @@ class GameState {
         return i+1;
       }
     }
+    int i = prevMove[0];
+    int j = prevMove[1];
+    int r_LowerBound = max(prevMove[0]-4, 0);
+    int r_UpperBound = min(prevMove[0]+5, BOARD_SIZE);
+    int c_LowerBound = max(prevMove[1]-4, 0);
+    int c_UpperBound = min(prevMove[1]+5, BOARD_SIZE);
     // column check
-    for (int r = 0; r < BOARD_SIZE - 4; ++r) {
-      for (int c = 0; c < BOARD_SIZE; ++c) {
-        if (winHelper(board[r][c], board[r+1][c], board[r+2][c], board[r+3][c], board[r+4][c])) {
+    for (int r = r_LowerBound; r < r_UpperBound - 4; ++r) {
+      for (int c = c_LowerBound; c < c_UpperBound; ++c) {
+        if (winHelper(board[r][c],board[r+1][c],board[r+2][c],board[r+3][c],board[r+4][c])) {
           return board[r][c];
         }
       }
     }
     // row check
-    for (int r = 0; r < BOARD_SIZE; ++r) {
-      for (int c = 0; c < BOARD_SIZE - 4; ++c) {
-        if (winHelper(board[r][c], board[r][c+1], board[r][c+2], board[r][c+3], board[r][c+4])) {
+    for (int r = r_LowerBound; r < r_UpperBound; ++r) {
+      for (int c = c_LowerBound; c < c_UpperBound - 4; ++c) {
+        if (winHelper(board[r][c],board[r][c+1],board[r][c+2],board[r][c+3],board[r][c+4])) {
           return board[r][c];
         }
       }
     }
     // down diagonal
-    for (int r = 0; r < BOARD_SIZE - 4; ++r) {
-      for (int c = 0; c < BOARD_SIZE - 4; ++c) {
-        if (winHelper(board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3], board[r+4][c+4])) {
+    for (int r = r_LowerBound; r < r_UpperBound - 4; ++r) {
+      for (int c = c_LowerBound; c < c_UpperBound - 4; ++c) {
+        if (winHelper(board[r][c],board[r+1][c+1],board[r+2][c+2],board[r+3][c+3],board[r+4][c+4])) {
           return board[r][c];
         }
       }
     }
     // up diagonal
-    for (int r = 4; r < BOARD_SIZE; ++r) {
-      for (int c = 0; c < BOARD_SIZE - 4; ++c) {
-        if (winHelper(board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3], board[r-4][c+4])) {
+    for (int r = r_LowerBound+4; r < r_UpperBound; ++r) {
+      for (int c = c_LowerBound; c < c_UpperBound - 4; ++c) {
+        if (winHelper(board[r][c],board[r-1][c+1],board[r-2][c+2],board[r-3][c+3],board[r-4][c+4])) {
           return board[r][c];
         }
       }
@@ -87,6 +94,46 @@ class GameState {
 
   private boolean winHelper(int c1, int c2, int c3, int c4, int c5) {
     return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;
+  }
+
+  int tessCheck() {
+    // column check
+    for (int r = 0; r < BOARD_SIZE - 5; ++r) {
+      for (int c = 0; c < BOARD_SIZE; ++c) {
+        if (tessHelper(board[r][c],board[r+1][c],board[r+2][c],board[r+3][c],board[r+4][c],board[r+5][c])) {
+          return board[r+1][c];
+        }
+      }
+    }
+    // row check
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+      for (int c = 0; c < BOARD_SIZE - 5; ++c) {
+        if (tessHelper(board[r][c],board[r][c+1],board[r][c+2],board[r][c+3],board[r][c+4],board[r][c+5])) {
+          return board[r][c+1];
+        }
+      }
+    }
+    // down diagonal
+    for (int r = 0; r < BOARD_SIZE - 5; ++r) {
+      for (int c = 0; c < BOARD_SIZE - 5; ++c) {
+        if (tessHelper(board[r][c],board[r+1][c+1],board[r+2][c+2],board[r+3][c+3],board[r+4][c+4],board[r+5][c+5])) {
+          return board[r+1][c+1];
+        }
+      }
+    }
+    // up diagonal
+    for (int r = 5; r < BOARD_SIZE; ++r) {
+      for (int c = 0; c < BOARD_SIZE - 5; ++c) {
+        if (tessHelper(board[r][c],board[r-1][c+1],board[r-2][c+2],board[r-3][c+3],board[r-4][c+4],board[r-5][c+5])) {
+          return board[r-1][c+1];
+        }
+      }
+    }
+    return 0;
+  }
+
+  private boolean tessHelper(int c1, int c2, int c3, int c4, int c5, int c6) {
+    return c1 == 0 && c2 != 0 && c2 == c3 && c3 == c4 && c4 == c5 && c6 == 0;
   }
 
   public boolean isTie() {
@@ -188,13 +235,33 @@ class GameState {
     return new GameState(board, captures, turnNum, prevMove, winner);
   }
 
-
-  int[][] getMovePool() {
-    int[] bounds = getSearchField();
-    int[][] connectionBoard = getConnectionBoard();
+  public int[][] getPossibleMoves() {
+    // find all possible moves and store in a list
+    int[] bounds = this.getSearchField();
     List<int[]> possibleMoves = new ArrayList<int[]>();
     for (int i = bounds[0]; i <= bounds[1]; ++i) {
       for (int j = bounds[2]; j <= bounds[3]; ++j) {
+        int[] moveLocation = {i, j};
+        if (isValidMove(moveLocation)) {
+          possibleMoves.add(moveLocation);
+        }
+      }
+    }
+    // convert to array and return that array
+    int[][] retArr = new int[possibleMoves.size()][2];
+    possibleMoves.toArray(retArr);
+    return retArr;
+  }
+
+  int[][] getMovePool() {
+    return getMovePool(getConnectionBoard());
+  }
+
+  int[][] getMovePool(int[][] connectionBoard) {
+    int[] bounds = getSearchField();
+    List<int[]> possibleMoves = new ArrayList<int[]>();
+    for (int i = bounds[0]; i < bounds[1]; ++i) {
+      for (int j = bounds[2]; j < bounds[3]; ++j) {
         if (connectionBoard[i][j] >= 0) {
           possibleMoves.add(new int[]{i, j, connectionBoard[i][j]});
         }
@@ -204,9 +271,13 @@ class GameState {
     possibleMoves.toArray(movePool);
     return movePool;
   }
-  
+
   int[][] getSortedMovePool() {
-    int[][] movePool = getMovePool();
+    return getSortedMovePool(getConnectionBoard());
+  }
+  
+  int[][] getSortedMovePool(int[][] connectionBoard) {
+    int[][] movePool = getMovePool(connectionBoard);
     quickSortMoves(movePool, 0, movePool.length - 1);
     return movePool;
   }
@@ -227,40 +298,53 @@ class GameState {
 
   private int[] threeWayPartitionMoves(int[][] moveArr, int left, int right) {
     // 3-way partition for quicksort to handle few equal elements in array
-    int lessThan = left; // the part that is less than the pivot
+    int greaterThan = left; // the part that is less than the pivot
     int i = left; // array is scanned from left to right
-    int greaterThan = right; // the part that is greater than the pivot
+    int lessThan = right; // the part that is greater than the pivot
     int pivot = moveArr[left][2]; // 1st element in array, randomized in parent method
-    while (i <= greaterThan) {
-      if (moveArr[i][2] < pivot) {
-        int[] temp = moveArr[lessThan];
-        moveArr[lessThan] = moveArr[i];
+    while (i <= lessThan) {
+      if (moveArr[i][2] > pivot) {
+        int[] temp = moveArr[greaterThan];
+        moveArr[greaterThan] = moveArr[i];
         moveArr[i] = temp;
-        lessThan++;
+        greaterThan++;
         i++;
-      } else if (moveArr[i][2] > pivot) {
+      } else if (moveArr[i][2] < pivot) {
         int[] temp = moveArr[i];
-        moveArr[i] = moveArr[greaterThan];
-        moveArr[greaterThan] = temp;
-        greaterThan--;
+        moveArr[i] = moveArr[lessThan];
+        moveArr[lessThan] = temp;
+        lessThan--;
       } else {
         i++;
       }
     }
-    return new int[]{ lessThan, greaterThan };
+    return new int[]{ greaterThan, lessThan};
   }
 
   public int[] getSearchField() {
-    // {top, bottom, left, right}
-    int[] boundaries = new int[] {BOARD_SIZE, 0, BOARD_SIZE, 0};
+    // check special scenario -> is the board empty or not?
+    int firstLocationRow = -1;
+    emptyCheck:
     for (int i = 0; i < BOARD_SIZE; ++i) {
       for (int j = 0; j < BOARD_SIZE; ++j) {
         if (board[i][j] != 0) {
+          firstLocationRow = i;
+          break emptyCheck;
+        }
+      }
+    }
+    if (firstLocationRow == -1) { // search field is middle of board
+      return new int[] {4, BOARD_SIZE - 4, 4, BOARD_SIZE - 4};
+    }
+    // calculate board boundaries
+    int[] boundaries = new int[] {max(0, firstLocationRow - 4), 0, BOARD_SIZE, 0};
+    for (int i = firstLocationRow; i < BOARD_SIZE; ++i) {
+      for (int j = 0; j < BOARD_SIZE; ++j) {
+        if (board[i][j] != 0) {
           // there is a piece at [i][j]
-          boundaries[0] = min(boundaries[0], max(0, i-4));
-          boundaries[1] = max(boundaries[1], min(BOARD_SIZE-1, i+4));
+          boundaries[1] = max(boundaries[1], min(BOARD_SIZE, i+4));
           boundaries[2] = min(boundaries[2], max(0, j-4));
-          boundaries[3] = max(boundaries[3], min(BOARD_SIZE-1, j+4));
+          boundaries[3] = max(boundaries[3], min(BOARD_SIZE, j+4));
         }
       }
     }
@@ -271,38 +355,92 @@ class GameState {
     int[] boundaries = getSearchField();
     int[][] connectionBoard = new int[BOARD_SIZE][BOARD_SIZE]; // new value array of same size as board
     // cycle through search field
-    for (int i = boundaries[0]; i <= boundaries[1]; ++i) {
-      for (int j = boundaries[2]; j <= boundaries[3]; ++j) {
-        // if there is a piece then do not check
+    for (int i = boundaries[0]; i < boundaries[1]; ++i) {
+      for (int j = boundaries[2]; j < boundaries[3]; ++j) {
         if (board[i][j] != 0) {
           // a negative one represents a piece
           connectionBoard[i][j] = -1;
-        } else {
-          int k_LowerBound = max(boundaries[0], i-4);
-          int k_UpperBound = 1 + min(boundaries[1], i+4);
-          int l_LowerBound = max(boundaries[2], j-4);
-          int l_UpperBound = 1 + min(boundaries[3], j+4);
-          for (int k = k_LowerBound; k < k_UpperBound; ++k) {
-            // vertical (|)
-            if (board[k][j] != 0) {
-              connectionBoard[i][j] += 1;
+          // vertical (|)
+          int v_LowerBound = max(boundaries[0], i-4);
+          int v_UpperBound = min(boundaries[1], i+5);
+          for (int v = v_LowerBound; v < v_UpperBound; ++v) {
+            if (connectionBoard[v][j] != -1) {
+              connectionBoard[v][j]++;
             }
-            for (int l = l_LowerBound; l < l_UpperBound; ++l) {
-              // horizontal (-)
-              if (k == k_LowerBound && board[i][l] != 0) {
-                connectionBoard[i][j] += 1;
-              }
-              // diagonal back (\)
-              if (k-i == l-j && board[k][l] != 0) {
-                connectionBoard[i][j] += 1;
-              }
-              // diagonal fowards (/)
-              if (i-k == l-j && board[k][l] != 0) {
-                connectionBoard[i][j] += 1;
-              }
+          }
+          // horizontal (-)
+          int h_LowerBound = max(boundaries[2], j-4);
+          int h_UpperBound = min(boundaries[3], j+5);
+          for (int h = h_LowerBound; h < h_UpperBound; ++h) {
+            if (connectionBoard[i][h] != -1) {
+              connectionBoard[i][h]++;
+            }
+          }
+            // diagonal back (\)
+          int db_LowerBound = max(v_LowerBound-i, h_LowerBound-j);
+          int db_UpperBound = min(v_UpperBound-i, h_UpperBound-j);
+          for (int df = db_LowerBound; df < db_UpperBound; ++df) {
+            if (connectionBoard[i+df][j+df] != -1) {
+              connectionBoard[i+df][j+df] ++;
+            }
+          }
+          // diagonal fowards (/)
+          int df_LowerBound = max(v_LowerBound-i, j-(h_UpperBound-1));
+          int df_UpperBound = min(v_UpperBound-i, j-(h_LowerBound-1));
+          for (int df = df_LowerBound; df < df_UpperBound; ++df) {
+            if (connectionBoard[i+df][j-df] != -1) {
+              connectionBoard[i+df][j-df]++;
             }
           }
         }
+      }
+    }
+    return connectionBoard;
+  }
+
+  int[][] getConnectionBoard(int[][] prevConnectionBoard, int[] prevCaptures) {
+    // for simulations: get current state's connection board from previous by looking at prevMove
+    // if this is the first move or the previous move was a capture move, we have to recalculate
+    if (prevMove == null || prevCaptures[0] != captures[0] || prevCaptures[1] != captures[1]) {
+      return getConnectionBoard();
+    }
+    // if it wasn't a capture move, we can just look at that move
+    int[][] connectionBoard = prevConnectionBoard; // no need for deep copy (only called during sims)
+    int[] boundaries = getSearchField();
+    int i = prevMove[0];
+    int j = prevMove[1];
+    // update the move's connection board state, and those around that move
+    connectionBoard[i][j] = -1;
+    // vertical (|)
+    int v_LowerBound = max(boundaries[0], i-4);
+    int v_UpperBound = min(boundaries[1], i+5);
+    for (int v = v_LowerBound; v < v_UpperBound; ++v) {
+      if (connectionBoard[v][j] != -1) {
+        connectionBoard[v][j]++;
+      }
+    }
+    // horizontal (-)
+    int h_LowerBound = max(boundaries[2], j-4);
+    int h_UpperBound = min(boundaries[3], j+5);
+    for (int h = h_LowerBound; h < h_UpperBound; ++h) {
+      if (connectionBoard[i][h] != -1) {
+        connectionBoard[i][h]++;
+      }
+    }
+      // diagonal back (\)
+    int db_LowerBound = max(v_LowerBound-i, h_LowerBound-j);
+    int db_UpperBound = min(v_UpperBound-i, h_UpperBound-j);
+    for (int df = db_LowerBound; df < db_UpperBound; ++df) {
+      if (connectionBoard[i+df][j+df] != -1) {
+        connectionBoard[i+df][j+df] ++;
+      }
+    }
+    // diagonal fowards (/)
+    int df_LowerBound = max(v_LowerBound-i, j-(h_UpperBound-1));
+    int df_UpperBound = min(v_UpperBound-i, j-(h_LowerBound-1));
+    for (int df = df_LowerBound; df < df_UpperBound; ++df) {
+      if (connectionBoard[i+df][j-df] != -1) {
+        connectionBoard[i+df][j-df]++;
       }
     }
     return connectionBoard;

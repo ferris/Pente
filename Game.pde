@@ -15,7 +15,7 @@ class Game {
   }
 
   public void turnGeneration() {
-    if (gameState.winCheck() == 0) {
+    if (gameState.getWinner() == 0) {
       boolean newMove = false;
       int[] move = new int[2];
       if (mode.equals("local")) {
@@ -29,7 +29,7 @@ class Game {
             move = new int[] {hmc[1], hmc[2]};
             newMove = hmc[0] == 1;
           } else {
-            moveDelay = true; // TODO: get rid of dumb debug things here and in Pente file (returning sc instead of move, etc) //<>//
+            moveDelay = true; // TODO: get rid of dumb debug things here and in Pente file (returning sc instead of move, etc)
           }
         } else {
           if (moveDelay) {
@@ -187,7 +187,7 @@ class Game {
   }
 
   void winnerAlert() {
-    int winner = gameState.winCheck();
+    int winner = gameState.getWinner();
     if (winner != 0) {
       color darkC;
       color lightC;

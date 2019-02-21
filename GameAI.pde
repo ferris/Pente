@@ -35,11 +35,11 @@ public class GameAI {
   }
 
   private float MCTSSolver(MCTNode n) {
-    if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
-      return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run)
-    } else if (n.getGameState().getWinner() == (3 - n.getGameState().getPlayerOfCurrentTurn())) {
+    if (n.getGameState().getWinner() == (3 - n.getGameState().getPlayerOfCurrentTurn())) {
       n.setValue(Float.POSITIVE_INFINITY);
       return Float.NEGATIVE_INFINITY;
+    } else if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
+      return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run)
     }
     MCTNode bestChild;
     float result;
@@ -94,26 +94,71 @@ public class GameAI {
 
   private MCTNode expand(MCTNode node) {
     node.generateChildren();
+    int playerToMove = node.getGameState().getPlayerOfCurrentTurn();
+    for (MCTNode child : node.getChildren()) {
+      if (child.getGameState().getWinner() == playerToMove) {
+        child.setValue(Float.POSITIVE_INFINITY);
+        break;
+      } else if (child.getGameState().tessCheck() == playerToMove) {
+        child.generateChildren();
+        for (MCTNode grandchild : child.getChildren()) {
+          int childCapturesForUnplayer = child.getGameState().getCaptureCount()[2-playerToMove];
+          int grandchildCapturesForUnplayer = grandchild.getGameState().getCaptureCount()[2-playerToMove];
+          if (grandchildCapturesForUnplayer > childCapturesForUnplayer) {
+            return select(node, EXPLORATION_PARAMETER);
+          }
+        }
+        child.setValue(Float.POSITIVE_INFINITY);
+      }
+    }
     return select(node, EXPLORATION_PARAMETER);
   }
 
   private float playOut(MCTNode node) {
     node.addOneToVisits();
     GameState state = node.getGameState().getDuplicate();
+    int[][] conBoard = state.getConnectionBoard();
     while (state.getWinner() == 0 || state.isTie()) {
-      int[][] movePool = state.getMovePool();
+      int[][] movePool = state.getMovePool(conBoard);
+      if (movePool.length == 0) { break; }
+      // get two possible moves, choose the one with the greater connection value
+      int[] moveOption1 = movePool[int(random(movePool.length))];
+      int[] moveOption2 = movePool[int(random(movePool.length))];
+      int[] move = new int[2];
+      if (moveOption1[2] >= moveOption2[2]) {
+        move[0] = moveOption1[0];
+        move[1] = moveOption1[1];
+      } else {
+        move[0] = moveOption2[0];
+        move[1] = moveOption2[1];
+      }
+      int[] cc = state.getCaptureCount();
+      state.playMove(move);
+      conBoard = state.getConnectionBoard(conBoard, cc);
+    }
+    float result = (state.getWinner() == node.getGameState().getPlayerOfCurrentTurn()) ? -1 : 1;
+    node.addToValue(result);
+    return result;
+  }
+
+  private float playOutH(MCTNode node) {
+    node.addOneToVisits();
+    GameState state = node.getGameState().getDuplicate();
+    while (state.getWinner() == 0 || state.isTie()) {
+      int[][] movePool = state.getPossibleMoves();
       if (movePool.length > 0) {
         // get two possible moves, choose the one with the greater connection value
-        int[] moveOption1 = movePool[int(random(movePool.length))];
-        int[] moveOption2 = movePool[int(random(movePool.length))];
-        int[] move = new int[2];
-        if (moveOption1[2] >= moveOption2[2]) {
-          move[0] = moveOption1[0];
-          move[1] = moveOption1[1];
-        } else {
-          move[0] = moveOption2[0];
-          move[1] = moveOption2[1];
-        }
+        int[] move = movePool[int(random(movePool.length))];
+        // int[] moveOption1 = movePool[int(random(movePool.length))];
+        // int[] moveOption2 = movePool[int(random(movePool.length))];
+        // int[] move = new int[2];
+        // if (moveOption1[2] >= moveOption2[2]) {
+        //   move[0] = moveOption1[0];
+        //   move[1] = moveOption1[1];
+        // } else {
+        //   move[0] = moveOption2[0];
+        //   move[1] = moveOption2[1];
+        // }
         state.playMove(move);
       } else {
         break;

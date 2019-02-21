@@ -35,7 +35,7 @@ class Game {
           if (moveDelay) {
             println();
             println("computer is thinking");
-            long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+            long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(); //<>//
             sc = ai.getComputerMove(gameState);
             move = sc.getGameState().getPreviousMove();
             //move = ai.getComputerMove(gameState);

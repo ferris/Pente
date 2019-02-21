@@ -13,8 +13,8 @@ public class GameAI {
     MCTNode root = new MCTNode(currentGameState);
     // analyze within time
     int timesRun = 0;
-    while (millis() - beginTime < calculationTime) {
-    //while (timesRun < 3000) {
+    //while (millis() - beginTime < calculationTime) {
+    while (timesRun < 3000) {
       float turnValue = MCTSSolver(root);
       // break if proven win or loss
       if (turnValue == Float.POSITIVE_INFINITY || turnValue == Float.NEGATIVE_INFINITY) {
@@ -93,22 +93,26 @@ public class GameAI {
   }
 
   private MCTNode expand(MCTNode node) {
-    node.generateChildren();
+    node.generateChildren(); //<>//
     int playerToMove = node.getGameState().getPlayerOfCurrentTurn();
-    for (MCTNode child : node.getChildren()) {
-      if (child.getGameState().getWinner() == playerToMove) {
-        child.setValue(Float.POSITIVE_INFINITY);
+    for (MCTNode child : node.getChildren()) { //<>//
+      if (child.getGameState().getWinner() == playerToMove) { //<>//
+        child.setValue(Float.POSITIVE_INFINITY); //<>//
         break;
       } else if (child.getGameState().tessCheck() == playerToMove) {
         child.generateChildren();
         for (MCTNode grandchild : child.getChildren()) {
-          int childCapturesForUnplayer = child.getGameState().getCaptureCount()[2-playerToMove];
-          int grandchildCapturesForUnplayer = grandchild.getGameState().getCaptureCount()[2-playerToMove];
-          if (grandchildCapturesForUnplayer > childCapturesForUnplayer) {
-            return select(node, EXPLORATION_PARAMETER);
+          int childUnCaptures = child.getGameState().getCaptureCount()[2-playerToMove];
+          int grandchildUnCaptures = grandchild.getGameState().getCaptureCount()[2-playerToMove];
+          if (grandchildUnCaptures > childUnCaptures && grandchild.getGameState().tessCheck() != playerToMove) {
+            if (grandchild.getGameState().tessCheck() != playerToMove) {
+              return select(node, EXPLORATION_PARAMETER); //<>//
+            }
+          } else if (grandchild.getGameState().getWinner() == 3 - playerToMove) {
+            return select(node, EXPLORATION_PARAMETER); //<>//
           }
         }
-        child.setValue(Float.POSITIVE_INFINITY);
+        child.setValue(Float.POSITIVE_INFINITY); //<>//
       }
     }
     return select(node, EXPLORATION_PARAMETER);

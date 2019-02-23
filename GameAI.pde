@@ -14,7 +14,7 @@ public class GameAI {
     // analyze within time
     int timesRun = 0;
     //while (millis() - beginTime < calculationTime) {
-    while (timesRun < 3000) {
+    while (timesRun < 5000) {
       float turnValue = MCTSSolver(root);
       // break if proven win or loss
       if (turnValue == Float.POSITIVE_INFINITY || turnValue == Float.NEGATIVE_INFINITY) {

@@ -36,10 +36,7 @@ void setup() {
   // Text mode "center"
   textAlign(CENTER);
   size(800, 600);
-  // FOR DEBUGING PURPOSES:
-  game = new Game("single", 1);
-  ai = new GameAI(5000);
-  room = "game";
+  room = "mainMenu";
 }
 
 void draw() {

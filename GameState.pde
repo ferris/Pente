@@ -446,6 +446,39 @@ class GameState {
     return connectionBoard;
   }
 
+  public boolean someWinConfirmed() {
+    return someWinConfirmed(3 - turnNum);
+  }
+
+  public boolean someWinConfirmed(int possibleWinner) {
+    return winner == possibleWinner || tessWinConfirmed(possibleWinner);
+  }
+
+  public boolean tessWinConfirmed() {
+    return tessWinConfirmed(3 - turnNum);
+  }
+
+  public boolean tessWinConfirmed(int possibleWinner) {
+    // ensure that the child check is actually required
+    if (tessCheck() != possibleWinner) {
+      return false;
+    }
+    // see if there is a "checkmate" through a tess play
+    // everything is done in temporary variables to reduce memory consumption
+    MCTNode tempState = new MCTNode(this);
+    tempState.generateChildren();
+    int tempPlayerCaptures = tempState.getGameState().getCaptureCount()[2 - possibleWinner];
+    for (MCTNode tempChild : tempState.getChildren()) {
+      int tempChildPlayerCaptures = tempChild.getGameState().getCaptureCount()[2 - possibleWinner];
+      if (tempChildPlayerCaptures > tempPlayerCaptures && tempChild.getGameState().tessCheck() != possibleWinner) {
+        return false;
+      } else if (tempChild.getGameState().getWinner() == 3 - possibleWinner) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public int getPlayerOfCurrentTurn() {
     return turnNum;
   }

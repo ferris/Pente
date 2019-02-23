@@ -32,7 +32,7 @@ GameAI ai;
 
 void setup() {
   // V-sync
-  frameRate(60);
+  frameRate(120);
   // Text mode "center"
   textAlign(CENTER);
   size(800, 600);
@@ -40,6 +40,7 @@ void setup() {
 }
 
 void draw() {
+  //println("frameRate: " + frameRate);
   if (room.equals("mainMenu")) {
     mainMenu();
   } else if (room.equals("modeMenu")) {

@@ -34,7 +34,7 @@ void modeMenu() {
   textSize(42);
   text("Single Player", 400, 115);
   text("Local Multiplayer", 400, 315);
-  text("Online Multiplayer", 400, 515);
+  text("Zero Players", 400, 515);
 
   // BUTTONS
   // single player button
@@ -48,9 +48,11 @@ void modeMenu() {
     game = new Game("local", 1);
     room = "game";
   }
-  // online multiplayer button
+  // zero players button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
-    room = "mainMenu";
+    game = new Game("zero", 1);
+    ai = new GameAI(2000);
+    room = "game";
   }
   // back button
   if (mouseReleased && mouseX > 75 && mouseX < 125 && mouseY < 550 && mouseY > 50) {

@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Arrays;
 
 class GameState {
-  public static final int BOARD_SIZE = 19; // size of board
+  public static final int BOARD_SIZE = 9; // size of board
   private int[][] board = new int[BOARD_SIZE][BOARD_SIZE]; // board
   private int[] captures = new int[2];
   private int turnNum; // current turn

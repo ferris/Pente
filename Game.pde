@@ -2,15 +2,27 @@ import java.lang.Runtime;
 
 class Game {
   private GameState gameState;
-  private String mode; // game mode chosen through menu
+  //private String mode; // game mode chosen through menu
   private boolean winDelay = false; // prevents accidental return to menu
   private boolean moveDelay = false; // allows a frame to be drawn before move chosen
+  private char[] playerTypes;
   
   // debug purposes
   MCTNode sc;
   // debug end
   public Game(String mode, int startingPlayer) {
-    this.mode = mode;
+    //this.mode = mode;
+    switch (mode) {
+      case "local":
+        playerTypes = new char[]{ 'h', 'h' };
+        break;
+      case "single":
+        playerTypes = new char[]{ 'h', 'c' };
+        break;
+      case "zero":
+        playerTypes = new char[]{ 'c', 'c' };
+        break;
+    }
     this.gameState = new GameState(startingPlayer);
   }
 
@@ -18,35 +30,26 @@ class Game {
     if (gameState.getWinner() == 0) {
       boolean newMove = false;
       int[] move = new int[2];
-      if (mode.equals("local")) {
-        int[] hmc = humanMoveCheck();
-        move = new int[] {hmc[1], hmc[2]};
-        newMove = hmc[0] == 1;
-      } else if (mode.equals("single")) {
-        if (gameState.getPlayerOfCurrentTurn() == 1) {
-          if (moveDelay) {
-            int[] hmc = humanMoveCheck();
-            move = new int[] {hmc[1], hmc[2]};
-            newMove = hmc[0] == 1;
-          } else {
-            moveDelay = true; // TODO: get rid of dumb debug things here and in Pente file (returning sc instead of move, etc)
-          }
-        } else {
-          if (moveDelay) {
-            println();
-            println("computer is thinking");
-            long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            sc = ai.getComputerMove(gameState);
-            move = sc.getGameState().getPreviousMove();
-            //move = ai.getComputerMove(gameState);
-            long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            //println("memory_before: " + str(memoryBefore/1048576) + "MiB");
-            //println("memory_after: " + str(memoryAfter/1048576) + "MiB");
-            //println("memory_change: " + str((memoryAfter-memoryBefore)/1048576) + "MiB");
-            newMove = true;
-          }
-          moveDelay = true;
+      if (moveDelay) {
+        if (playerTypes[gameState.getPlayerOfCurrentTurn() - 1] == 'h') {
+          int[] hmc = humanMoveCheck();
+          move = new int[] {hmc[1], hmc[2]};
+          newMove = hmc[0] == 1;
+        } else if (playerTypes[gameState.getPlayerOfCurrentTurn() - 1] == 'c') {
+          println();
+          println("computer is thinking");
+          long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+          sc = ai.getComputerMove(gameState);
+          move = sc.getGameState().getPreviousMove();
+          //move = ai.getComputerMove(gameState);
+          long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+          //println("memory_before: " + str(memoryBefore/1048576) + "MiB");
+          //println("memory_after: " + str(memoryAfter/1048576) + "MiB");
+          //println("memory_change: " + str((memoryAfter-memoryBefore)/1048576) + "MiB");
+          newMove = true;
         }
+      } else {
+        moveDelay = true;
       }
       if (newMove) {
         moveDelay = false;
@@ -55,7 +58,7 @@ class Game {
     }
   }
   
-  int[] humanMoveCheck() {
+  private int[] humanMoveCheck() {
     // returns {moveMade, row, column}
     int[] retArr = {0, -1, -1};
     if (155 < mouseX && mouseX <= 646 && 52 <= mouseY && mouseY <= 543) {
@@ -69,6 +72,10 @@ class Game {
       }
     }
     return retArr;
+  }
+
+  private void switchAround() {
+    
   }
 
   public boolean gameIsOver() {

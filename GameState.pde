@@ -98,8 +98,8 @@ class GameState {
 
   int tessCheck() {
     // column check
-    for (int r = 0; r < BOARD_SIZE - 5; ++r) { //<>//
-      for (int c = 0; c < BOARD_SIZE; ++c) { //<>//
+    for (int r = 0; r < BOARD_SIZE - 5; ++r) {
+      for (int c = 0; c < BOARD_SIZE; ++c) {
         if (tessHelper(board[r][c],board[r+1][c],board[r+2][c],board[r+3][c],board[r+4][c],board[r+5][c])) {
           return board[r+1][c];
         }
@@ -133,7 +133,7 @@ class GameState {
   }
 
   private boolean tessHelper(int c1, int c2, int c3, int c4, int c5, int c6) {
-    return c1 == 0 && c2 != 0 && c2 == c3 && c3 == c4 && c4 == c5 && c6 == 0; //<>//
+    return c1 == 0 && c2 != 0 && c2 == c3 && c3 == c4 && c4 == c5 && c6 == 0;
   }
 
   public boolean isTie() {

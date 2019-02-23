@@ -93,32 +93,33 @@ public class GameAI {
   }
 
   private MCTNode expand(MCTNode node) {
-    node.generateChildren(); //<>//
+    node.generateChildren();
     int playerToMove = node.getGameState().getPlayerOfCurrentTurn();
-    for (MCTNode child : node.getChildren()) { //<>//
-      if (child.getGameState().getWinner() == playerToMove) { //<>//
-        child.setValue(Float.POSITIVE_INFINITY); //<>//
+    for (MCTNode child : node.getChildren()) {
+      if (child.getGameState().getWinner() == playerToMove) {
+        child.setValue(Float.POSITIVE_INFINITY);
         break;
       } else if (child.getGameState().tessCheck() == playerToMove) {
-        child.generateChildren();
-        for (MCTNode grandchild : child.getChildren()) {
-          int childUnCaptures = child.getGameState().getCaptureCount()[2-playerToMove];
+        MCTNode tempChild = new MCTNode(child.getGameState());
+        tempChild.generateChildren();
+        for (MCTNode grandchild : tempChild.getChildren()) {
+          int childUnCaptures = tempChild.getGameState().getCaptureCount()[2-playerToMove];
           int grandchildUnCaptures = grandchild.getGameState().getCaptureCount()[2-playerToMove];
           if (grandchildUnCaptures > childUnCaptures && grandchild.getGameState().tessCheck() != playerToMove) {
             if (grandchild.getGameState().tessCheck() != playerToMove) {
-              return select(node, EXPLORATION_PARAMETER); //<>//
+              return select(node, EXPLORATION_PARAMETER);
             }
           } else if (grandchild.getGameState().getWinner() == 3 - playerToMove) {
-            return select(node, EXPLORATION_PARAMETER); //<>//
+            return select(node, EXPLORATION_PARAMETER);
           }
         }
-        child.setValue(Float.POSITIVE_INFINITY); //<>//
+        child.setValue(Float.POSITIVE_INFINITY);
       }
     }
     return select(node, EXPLORATION_PARAMETER);
   }
 
-  private float playOut(MCTNode node) {
+  private float playOutH(MCTNode node) {
     node.addOneToVisits();
     GameState state = node.getGameState().getDuplicate();
     int[][] conBoard = state.getConnectionBoard();
@@ -145,24 +146,13 @@ public class GameAI {
     return result;
   }
 
-  private float playOutH(MCTNode node) {
+  private float playOut(MCTNode node) {
     node.addOneToVisits();
     GameState state = node.getGameState().getDuplicate();
     while (state.getWinner() == 0 || state.isTie()) {
-      int[][] movePool = state.getPossibleMoves();
+      int[][] movePool = state.getMovePool();
       if (movePool.length > 0) {
-        // get two possible moves, choose the one with the greater connection value
         int[] move = movePool[int(random(movePool.length))];
-        // int[] moveOption1 = movePool[int(random(movePool.length))];
-        // int[] moveOption2 = movePool[int(random(movePool.length))];
-        // int[] move = new int[2];
-        // if (moveOption1[2] >= moveOption2[2]) {
-        //   move[0] = moveOption1[0];
-        //   move[1] = moveOption1[1];
-        // } else {
-        //   move[0] = moveOption2[0];
-        //   move[1] = moveOption2[1];
-        // }
         state.playMove(move);
       } else {
         break;

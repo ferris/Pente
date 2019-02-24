@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class GameAI {
-  private static final float EXPLORATION_PARAMETER = 2;
+  private static final float EXPLORATION_PARAMETER = 1;
   private int calculationTime;
   private ExecutorService executorService;
   private int availableProcessors;
@@ -136,7 +136,7 @@ public class GameAI {
     MCTNode[] children = node.getChildren();
     float bestValue = -1 * Float.MAX_VALUE;
     for (MCTNode child : children) {
-      float uctValue = child.getUCTValue(exploreParam);
+      float uctValue = child.getUCBValue(exploreParam);
       if (uctValue > bestValue) {
         bestValue = uctValue;
         selected = child;
@@ -154,11 +154,11 @@ public class GameAI {
     MCTNode[] bestFew = Arrays.copyOfRange(children, 0, min(numToSelect, children.length));
     float[] bestFewValues = new float[bestFew.length];
     for (int i = 0; i < bestFew.length; ++i) {
-      bestFewValues[i] = bestFew[i].getUCTValue(exploreParam);
+      bestFewValues[i] = bestFew[i].getUCBValue(exploreParam);
     }
     // look for better options
     for (int i = bestFew.length; i < children.length; ++i) {
-      float uctValue = children[i].getUCTValue(exploreParam);
+      float uctValue = children[i].getUCBValue(exploreParam);
       for (int j = 0; j < bestFew.length; ++j) {
         if (uctValue > bestFewValues[j]) {
           bestFewValues[j] = uctValue;
@@ -248,12 +248,12 @@ public class GameAI {
     return result;
   }
   
-  private MCTNode secureChild(MCTNode rootNode, float aParam) {
+  private MCTNode secureChild(MCTNode rootNode, float exploreParam) {
     MCTNode[] children = rootNode.getChildren();
     MCTNode selected = children[0];
     float bestValue = -1 * Float.MAX_VALUE;
     for (MCTNode child : children) {
-      float scValue = child.getSCValue(aParam);
+      float scValue = child.getLCBValue(exploreParam);
       if (scValue > bestValue) {
         bestValue = scValue;
         selected = child;

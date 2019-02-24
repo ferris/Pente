@@ -45,6 +45,8 @@ void draw() {
     mainMenu();
   } else if (room.equals("modeMenu")) {
     modeMenu();
+  } else if (room.equals("singleMenu")) {
+    singleMenu();
   } else if (room.equals("game")) {
     game.drawBoard();
     if (!game.gameIsOver()) {

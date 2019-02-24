@@ -39,9 +39,7 @@ void modeMenu() {
   // BUTTONS
   // single player button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    game = new Game("single", 1);
-    ai = new GameAI(10000);
-    room = "game";
+    room = "singleMenu";
   }
   // local multiplayer button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
@@ -51,7 +49,7 @@ void modeMenu() {
   // zero players button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
     game = new Game("zero", 1);
-    ai = new GameAI(2000);
+    ai = new GameAI(5000);
     room = "game";
   }
   // back button
@@ -60,7 +58,7 @@ void modeMenu() {
   }
 }
 
-/*
+
 void singleMenu() {
   noStroke();
   background(26, 188, 156);
@@ -81,20 +79,24 @@ void singleMenu() {
   // BUTTONS
   // easy button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
-    game = new Game("single", int(random(1, 3)));
+    game = new Game("single", 1);
+    ai = new GameAI(4000);
     room = "game";
   }
   // medium button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
-    room = "mainMenu";
+    game = new Game("single", 1);
+    ai = new GameAI(8000);
+    room = "game";
   }
   // hard button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
-    room = "mainMenu";
+    game = new Game("single", 1);
+    ai = new GameAI(16000);
+    room = "game";
   }
   // back button
   if (mouseReleased && mouseX > 75 && mouseX < 125 && mouseY < 550 && mouseY > 50) {
     room = "modeMenu";
   }
 }
-*/

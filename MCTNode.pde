@@ -25,17 +25,26 @@ public class MCTNode {
     }
   }
 
-  public float getUCTValue(float exploreParam) {
-    // initialize uct with small random number to break unexplored node ties in a random fashion
+  public float getUCBValue(float cParam) {
+    // initialize ucb with small random number to break unexplored node ties in a random fashion
     float uctValue = random(1) * epsilon;
-    // balance exploration and exploitation by applying UCT1 (Upper Confidence Bound 1 applied to trees)
+    // balance exploration and exploitation by calculating Upper Confidence Bound
     uctValue += totalValue / (numVisits + epsilon);
-    uctValue += sqrt(exploreParam * log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
+    uctValue += cParam * sqrt(2 * log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
     return uctValue;
   }
 
-  public float getSCValue(float aParam) {
-    return (totalValue / (numVisits + epsilon)) + (aParam / (sqrt(numVisits) + epsilon));
+  public float getLCBValue(float cParam) {
+    // initialize ucl with small random number to break unexplored node ties in a random fashion
+    float uctValue = random(1) * epsilon;
+    // balance exploration and exploitation by calculating Lower Confidence Bound
+    uctValue += totalValue / (numVisits + epsilon);
+    uctValue -= cParam * sqrt(2 * log(parent.getTotalVisits()) / (numVisits + epsilon));
+    return uctValue;
+  }
+  
+  public float getSCValue() {
+    return (totalValue / (numVisits + epsilon)) + (1 / (sqrt(numVisits) + epsilon));
   }
 
   public GameState getGameState() {

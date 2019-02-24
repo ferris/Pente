@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Arrays;
 
 class GameState {
-  public static final int BOARD_SIZE = 19; // size of board
+  public static final int BOARD_SIZE = 13; // size of board
   private int[][] board = new int[BOARD_SIZE][BOARD_SIZE]; // board
   private int[] captures = new int[2];
   private int turnNum; // current turn
@@ -262,7 +262,7 @@ class GameState {
     List<int[]> possibleMoves = new ArrayList<int[]>();
     for (int i = bounds[0]; i < bounds[1]; ++i) {
       for (int j = bounds[2]; j < bounds[3]; ++j) {
-        if (connectionBoard[i][j] >= 0) {
+        if (connectionBoard[i][j] >= 1) {
           possibleMoves.add(new int[]{i, j, connectionBoard[i][j]});
         }
       }

@@ -11,6 +11,7 @@ class Game {
   MCTNode sc;
   // debug end
   public Game(String mode, int startingPlayer) {
+    this.gameState = new GameState(startingPlayer);
     //this.mode = mode;
     switch (mode) {
       case "local":
@@ -21,9 +22,9 @@ class Game {
         break;
       case "zero":
         playerTypes = new char[]{ 'c', 'c' };
+        gameState.playMove(new int[]{9, 9});
         break;
     }
-    this.gameState = new GameState(startingPlayer);
   }
 
   public void turnGeneration() {
@@ -49,7 +50,7 @@ class Game {
           newMove = true;
         }
       } else {
-        moveDelay = true;
+        moveDelay = true; //<>//
       }
       if (newMove) {
         moveDelay = false;

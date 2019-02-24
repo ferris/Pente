@@ -74,10 +74,6 @@ class Game {
     return retArr;
   }
 
-  private void switchAround() {
-    
-  }
-
   public boolean gameIsOver() {
     return gameState.getWinner() != 0;
   }

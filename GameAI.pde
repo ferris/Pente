@@ -1,9 +1,18 @@
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 public class GameAI {
   private static final float EXPLORATION_PARAMETER = 2;
   private int calculationTime;
+  private ExecutorService executorService;
+  private int availableProcessors;
 
   public GameAI(int calculationTime) {
     this.calculationTime = calculationTime;
+    availableProcessors = Runtime.getRuntime().availableProcessors();
+    executorService = Executors.newFixedThreadPool(availableProcessors);
   }
   
   //public int[] getComputerMove(GameState currentGameState) {
@@ -11,11 +20,14 @@ public class GameAI {
     int beginTime = millis();
     // create tree
     MCTNode root = new MCTNode(currentGameState);
+    MCTSSolverTask.treeRoot = root;
+    MCTSSolverTask.parentAI = this;
     // analyze within time
     int timesRun = 0;
     while (millis() - beginTime < calculationTime) {
     //while (timesRun < 5000) {
-      float turnValue = MCTSSolver(root);
+      //float turnValue = MCTSSolver(root);
+      float turnValue = ParallelMCTSSolver(root);
       // break if proven win or loss
       if (turnValue == Float.POSITIVE_INFINITY || turnValue == Float.NEGATIVE_INFINITY) {
         println("INSTANT = " + turnValue);
@@ -28,10 +40,51 @@ public class GameAI {
     int timeTaken = millis() - beginTime;
     println("Best child value: " + sChild.getTotalValue());
     println("Best child simulations: " + sChild.getTotalVisits());
-    println("Ran " + timesRun + " times in " + timeTaken + " ms");
+    println("Ran the loop " + timesRun + " times in " + timeTaken + " ms");
+    println("Root had " + int(root.getTotalVisits()) + " visits in " + timeTaken + " ms");
     print("[");print(sChild.getGameState().getPreviousMove()[0]);print("] [");print(sChild.getGameState().getPreviousMove()[1]);println("]");
     //return sChild.getGameState().getPreviousMove();
     return sChild;
+  }
+
+  private float ParallelMCTSSolver(MCTNode rootNode) {
+    if (rootNode.isLeaf()) {
+      expand(rootNode);
+    }
+    MCTNode[] bestChildren = selectFew(rootNode, EXPLORATION_PARAMETER, availableProcessors);
+    ArrayList<MCTSSolverTask> tasks = new ArrayList<MCTSSolverTask>();
+    for (MCTNode child : bestChildren) {
+      rootNode.addOneToVisits();
+      if (child.getTotalValue() == Float.POSITIVE_INFINITY) {
+        rootNode.setValue(Float.NEGATIVE_INFINITY);
+        return Float.POSITIVE_INFINITY;
+      }
+      tasks.add(new MCTSSolverTask(child));
+    }
+    if (tasks.size() == 0) {
+      for (MCTNode child : rootNode.getChildren()) {
+        if (child.getTotalValue() != Float.NEGATIVE_INFINITY) {
+          rootNode.addToValue(-1 * availableProcessors);
+          return -1;
+        }
+      }
+    }
+    // analyze all results
+    List<Future<Float>> results;
+    float sumOfResults = 0;
+    try {
+      results = executorService.invokeAll(tasks);
+      for (Future<Float> futureResult : results) {
+        Float result = futureResult.get();
+        if (result != Float.POSITIVE_INFINITY && result != Float.NEGATIVE_INFINITY) {
+          sumOfResults += result;
+        }
+      }
+    } catch (Exception e) {
+      println(e);
+    }
+    rootNode.addToValue(sumOfResults);
+    return sumOfResults;
   }
 
   private float MCTSSolver(MCTNode n) {
@@ -90,6 +143,31 @@ public class GameAI {
       }
     }
     return selected;
+  }
+
+  private MCTNode[] selectFew(MCTNode node, float exploreParam, int numToSelect) {
+    // initialize variables and starting options
+    MCTNode[] children = node.getChildren();
+    if (children.length == 0) { // special case for no children to prevent NullPointerException
+      return new MCTNode[]{node};
+    }
+    MCTNode[] bestFew = Arrays.copyOfRange(children, 0, min(numToSelect, children.length));
+    float[] bestFewValues = new float[bestFew.length];
+    for (int i = 0; i < bestFew.length; ++i) {
+      bestFewValues[i] = bestFew[i].getUCTValue(exploreParam);
+    }
+    // look for better options
+    for (int i = bestFew.length; i < children.length; ++i) {
+      float uctValue = children[i].getUCTValue(exploreParam);
+      for (int j = 0; j < bestFew.length; ++j) {
+        if (uctValue > bestFewValues[j]) {
+          bestFewValues[j] = uctValue;
+          bestFew[j] = children[i];
+          break;
+        }
+      }
+    }
+    return bestFew;
   }
 
   private MCTNode expand(MCTNode node) {

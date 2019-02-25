@@ -22,7 +22,7 @@ class Game {
         break;
       case "zero":
         playerTypes = new char[]{ 'c', 'c' };
-        gameState.playMove(new int[]{9, 9});
+        gameState.playMove(new int[]{6, 6});
         break;
     }
   }
@@ -62,14 +62,17 @@ class Game {
   private int[] humanMoveCheck() {
     // returns {moveMade, row, column}
     int[] retArr = {0, -1, -1};
-    if (155 < mouseX && mouseX <= 646 && 52 <= mouseY && mouseY <= 543) {
+    if (146 < mouseX && mouseX <= 652 && 46 <= mouseY && mouseY <= 552) {
       noFill();
+      stroke(2);
       stroke(16, 24, 60);
-      ellipse((mouseX/26)*26+9, (mouseY/26)*26+13, 20, 20);
+      ellipse(39*floor((mouseX-165+15)/39)+165, 39*floor((mouseY-65+15)/39)+65, 30, 30);
+      //ellipse((mouseX-((mouseX+30)%39)), (mouseY-((mouseY+30)%39)), 30, 30);
+      //ellipse((mouseX/39)*39+9, (mouseY/39)*39+13, 20, 20);
       if (mouseReleased) {
         retArr[0] = 1;
-        retArr[1] = ((mouseY - 52) - (mouseY - 52) % 26) / 26; // row
-        retArr[2] = ((mouseX - 155) - (mouseX - 155) % 26) / 26; // col
+        retArr[1] = floor((mouseY-65+15)/39); // row
+        retArr[2] = floor((mouseX-165+15)/39); // col
       }
     }
     return retArr;
@@ -94,28 +97,23 @@ class Game {
     fill(214, 151, 97);
     rect(113, 13, 571, 571);
     // grid lines
-    for (int i = 65; i <= 533; i+=26) {
+    for (int i = 65; i <= 533; i+=39) {
+      if (floor((i - 65) / 39) % 6 == 0) {
+        strokeWeight(3);
+      } else {
+        strokeWeight(1);
+      }
       line(165, i, 633, i);
       line(i+100, 65, i+100, 532);
     }
     // guider overlay
     strokeWeight(3);
-    line(165, 300, 663, 300);
-    line(400, 65, 400, 563);
     strokeWeight(2);
-    arc(140, 300, 104, 104, radians(241), radians(480), CHORD);
-    arc(659, 300, 104, 104, radians(62), radians(298), CHORD);
-    arc(399, 40, 104, 104, radians(331), radians(570), CHORD);
-    arc(399, 559, 104, 104, radians(152), radians(388), CHORD);
     strokeWeight(3);
-    ellipse(321, 221, 2, 2);
-    ellipse(243, 143, 2, 2);
-    ellipse(477, 221, 2, 2);
-    ellipse(555, 143, 2, 2);
-    ellipse(243, 455, 2, 2);
-    ellipse(321, 377, 2, 2);
-    ellipse(477, 377, 2, 2);
-    ellipse(555, 455, 2, 2);
+    ellipse(282, 182, 2, 2);
+    ellipse(516, 182, 2, 2);
+    ellipse(282, 416, 2, 2);
+    ellipse(516, 416, 2, 2);
   }
 
   public void drawPieces() {
@@ -123,15 +121,15 @@ class Game {
     for (int i = 0; i < GameState.BOARD_SIZE; ++i) {
       for (int j = 0; j < GameState.BOARD_SIZE; ++j) {
         if (pieces[i][j] == 1) {
-          strokeWeight(2);
+          strokeWeight(3);
           stroke(10, 120, 140);
           fill(90, 200, 220);
-          ellipse(j*26+165, i*26+65, 20, 20);
+          ellipse(j*39+165, i*39+65, 33, 33);
         } else if (pieces[i][j] == 2) {
-          strokeWeight(2);
+          strokeWeight(3);
           stroke(175, 60, 0);
           fill(255, 140, 0);
-          ellipse(j*26+165, i*26+65, 20, 20);
+          ellipse(j*39+165, i*39+65, 33, 33);
         }
       }
     }

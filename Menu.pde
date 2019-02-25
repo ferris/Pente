@@ -48,9 +48,7 @@ void modeMenu() {
   }
   // zero players button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
-    game = new Game("zero", 1);
-    ai = new GameAI(5000);
-    room = "game";
+    room = "zeroMenu";
   }
   // back button
   if (mouseReleased && mouseX > 75 && mouseX < 125 && mouseY < 550 && mouseY > 50) {
@@ -92,6 +90,49 @@ void singleMenu() {
   // hard button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
     game = new Game("single", 1);
+    ai = new GameAI(16000);
+    room = "game";
+  }
+  // back button
+  if (mouseReleased && mouseX > 75 && mouseX < 125 && mouseY < 550 && mouseY > 50) {
+    room = "modeMenu";
+  }
+}
+
+
+void zeroMenu() {
+  noStroke();
+  background(26, 188, 156);
+  fill(44, 62, 80);
+  rect(200, 50, 400, 100, 50);
+  rect(200, 250, 400, 100, 50);
+  rect(200, 450, 400, 100, 50);
+  rect(75, 50, 50, 500, 25);
+  fill(236, 240, 241);
+  triangle(85, 275, 115, 305, 115, 245);
+  textAlign(CENTER);
+  textSize(118);
+  textSize(42);
+  text("Dumb", 400, 115);
+  text("Competent", 400, 315);
+  text("Smart", 400, 515);
+
+  // BUTTONS
+  // dumb button
+  if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
+    game = new Game("zero", 1);
+    ai = new GameAI(1000);
+    room = "game";
+  }
+  // competent button
+  if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 350 && mouseY > 250) {
+    game = new Game("zero", 1);
+    ai = new GameAI(4000);
+    room = "game";
+  }
+  // smart button
+  if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 550 && mouseY > 450) {
+    game = new Game("zero", 1);
     ai = new GameAI(16000);
     room = "game";
   }

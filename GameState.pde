@@ -10,6 +10,10 @@ class GameState {
   private int[] prevMove; // previous move
   private int winner = 0; // the winner
 
+  public GameState(int startingPlayer) {
+    turnNum = startingPlayer;
+  }
+
   public GameState(int[][] board, int[] captures, int turnNum, int[] prevMove, int winner) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
       for (int j = 0; j < BOARD_SIZE; ++j) {
@@ -22,8 +26,11 @@ class GameState {
     this.winner = winner;
   }
 
-  public GameState(int startingPlayer) {
-    turnNum = startingPlayer;
+  public boolean isValidMove(int[] move) {
+    if (move[0] >= 0 && move[0] < BOARD_SIZE && move[1] >= 0 && move[1] < BOARD_SIZE) {
+      return (board[move[0]][move[1]] == 0 && winner == 0);
+    }
+    return false;
   }
 
   public void playMove(int[] move) {
@@ -36,23 +43,13 @@ class GameState {
     }
   }
 
-  public boolean isValidMove(int[] move) {
-    if (move[0] >= 0 && move[0] < BOARD_SIZE && move[1] >= 0 && move[1] < BOARD_SIZE) {
-      return (board[move[0]][move[1]] == 0 && winner == 0);
-    }
-    return false;
-  }
-
-
-  int winCheck() {
+  public int winCheck() {
     // five captures check
     for (int i = 0; i < captures.length; ++i) {
       if (captures[i] >= 5) {
         return i+1;
       }
     }
-    int i = prevMove[0];
-    int j = prevMove[1];
     int r_LowerBound = max(prevMove[0]-4, 0);
     int r_UpperBound = min(prevMove[0]+5, BOARD_SIZE);
     int c_LowerBound = max(prevMove[1]-4, 0);
@@ -96,7 +93,7 @@ class GameState {
     return c1 != 0 && c1 == c2 && c2 == c3 && c3 == c4 && c4 == c5;
   }
 
-  int tessCheck() {
+  public int tessCheck() {
     // column check
     for (int r = 0; r < BOARD_SIZE - 5; ++r) {
       for (int c = 0; c < BOARD_SIZE; ++c) {
@@ -253,7 +250,7 @@ class GameState {
     return retArr;
   }
 
-  int[][] getMovePool() {
+  public int[][] getMovePool() {
     return getMovePool(getConnectionBoard());
   }
 
@@ -272,11 +269,11 @@ class GameState {
     return movePool;
   }
 
-  int[][] getSortedMovePool() {
+  public int[][] getSortedMovePool() {
     return getSortedMovePool(getConnectionBoard());
   }
   
-  int[][] getSortedMovePool(int[][] connectionBoard) {
+  public int[][] getSortedMovePool(int[][] connectionBoard) {
     int[][] movePool = getMovePool(connectionBoard);
     quickSortMoves(movePool, 0, movePool.length - 1);
     return movePool;
@@ -321,37 +318,7 @@ class GameState {
     return new int[]{ greaterThan, lessThan};
   }
 
-  public int[] getSearchField() {
-    // check special scenario -> is the board empty or not?
-    int firstLocationRow = -1;
-    emptyCheck:
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-      for (int j = 0; j < BOARD_SIZE; ++j) {
-        if (board[i][j] != 0) {
-          firstLocationRow = i;
-          break emptyCheck;
-        }
-      }
-    }
-    if (firstLocationRow == -1) { // search field is middle of board
-      return new int[] {4, BOARD_SIZE - 4, 4, BOARD_SIZE - 4};
-    }
-    // calculate board boundaries
-    int[] boundaries = new int[] {max(0, firstLocationRow - 4), 0, BOARD_SIZE, 0};
-    for (int i = firstLocationRow; i < BOARD_SIZE; ++i) {
-      for (int j = 0; j < BOARD_SIZE; ++j) {
-        if (board[i][j] != 0) {
-          // there is a piece at [i][j]
-          boundaries[1] = max(boundaries[1], min(BOARD_SIZE, i+4));
-          boundaries[2] = min(boundaries[2], max(0, j-4));
-          boundaries[3] = max(boundaries[3], min(BOARD_SIZE, j+4));
-        }
-      }
-    }
-    return boundaries;
-  }
-
-  int[][] getConnectionBoard() {
+  public int[][] getConnectionBoard() {
     int[] boundaries = getSearchField();
     int[][] connectionBoard = new int[BOARD_SIZE][BOARD_SIZE]; // new value array of same size as board
     // cycle through search field
@@ -444,6 +411,36 @@ class GameState {
       }
     }
     return connectionBoard;
+  }
+
+  private int[] getSearchField() {
+    // check special scenario -> is the board empty or not?
+    int firstLocationRow = -1;
+    emptyCheck:
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+      for (int j = 0; j < BOARD_SIZE; ++j) {
+        if (board[i][j] != 0) {
+          firstLocationRow = i;
+          break emptyCheck;
+        }
+      }
+    }
+    if (firstLocationRow == -1) { // search field is middle of board
+      return new int[] {4, BOARD_SIZE - 4, 4, BOARD_SIZE - 4};
+    }
+    // calculate board boundaries
+    int[] boundaries = new int[] {max(0, firstLocationRow - 4), 0, BOARD_SIZE, 0};
+    for (int i = firstLocationRow; i < BOARD_SIZE; ++i) {
+      for (int j = 0; j < BOARD_SIZE; ++j) {
+        if (board[i][j] != 0) {
+          // there is a piece at [i][j]
+          boundaries[1] = max(boundaries[1], min(BOARD_SIZE, i+4));
+          boundaries[2] = min(boundaries[2], max(0, j-4));
+          boundaries[3] = max(boundaries[3], min(BOARD_SIZE, j+4));
+        }
+      }
+    }
+    return boundaries;
   }
 
   public boolean someWinConfirmed() {

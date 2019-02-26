@@ -15,36 +15,22 @@ public class GameAI {
     executorService = Executors.newFixedThreadPool(availableProcessors);
   }
   
-  //public int[] getComputerMove(GameState currentGameState) {
-  public MCTNode getComputerMove(GameState currentGameState) {
+  public int[] getComputerMove(GameState currentGameState) {
     int beginTime = millis();
     // create tree
     MCTNode root = new MCTNode(currentGameState);
     MCTSSolverTask.treeRoot = root;
     MCTSSolverTask.parentAI = this;
     // analyze within time
-    int timesRun = 0;
     while (millis() - beginTime < calculationTime) {
-    //while (timesRun < 5000) {
-      //float turnValue = MCTSSolver(root);
       float turnValue = ParallelMCTSSolver(root);
-      // break if proven win or loss
+      // stop (break) to return if proven win or loss
       if (turnValue == Float.POSITIVE_INFINITY || turnValue == Float.NEGATIVE_INFINITY) {
-        println("INSTANT = " + turnValue);
         break;
       }
-      timesRun++;
     }
-    // get best child and return
-    MCTNode sChild = secureChild(root, 1);
-    int timeTaken = millis() - beginTime;
-    println("Best child value: " + sChild.getTotalValue());
-    println("Best child simulations: " + sChild.getTotalVisits());
-    println("Ran the loop " + timesRun + " times in " + timeTaken + " ms");
-    println("Root had " + int(root.getTotalVisits()) + " visits in " + timeTaken + " ms");
-    print("[");print(sChild.getGameState().getPreviousMove()[0]);print("] [");print(sChild.getGameState().getPreviousMove()[1]);println("]");
-    //return sChild.getGameState().getPreviousMove();
-    return sChild;
+    // return the move from the best child's GameState
+    return secureChild(root, 1).getGameState().getPreviousMove();
   }
 
   private float ParallelMCTSSolver(MCTNode rootNode) {
@@ -91,8 +77,6 @@ public class GameAI {
     if (n.getGameState().getWinner() == (3 - n.getGameState().getPlayerOfCurrentTurn())) {
       n.setValue(Float.POSITIVE_INFINITY);
       return Float.NEGATIVE_INFINITY;
-    } else if (n.getGameState().getWinner() == n.getGameState().getPlayerOfCurrentTurn()) {
-      return Float.POSITIVE_INFINITY; // I think I can remove this (it shouldn't ever run)
     }
     MCTNode bestChild;
     float result;
@@ -102,16 +86,17 @@ public class GameAI {
       bestChild = select(n, EXPLORATION_PARAMETER);
     }
     n.addOneToVisits();
-    if (bestChild.getTotalValue() != Float.POSITIVE_INFINITY && bestChild.getTotalValue() != Float.NEGATIVE_INFINITY) {
+    float bestChildVal = bestChild.getTotalValue();
+    if (bestChildVal != Float.POSITIVE_INFINITY && bestChildVal != Float.NEGATIVE_INFINITY) {
       if (bestChild.getTotalVisits() == 0) {
-        result = -1 * playOutH(bestChild);
+        result = -1 * playOut(bestChild);
         n.addToValue(result);
         return result;
       } else {
         result = -1 * MCTSSolver(bestChild);
       }
     } else {
-      result = bestChild.getTotalValue();
+      result = bestChildVal;
     }
     if (result == Float.POSITIVE_INFINITY) {
       n.setValue(Float.NEGATIVE_INFINITY);
@@ -181,13 +166,15 @@ public class GameAI {
     return select(node, EXPLORATION_PARAMETER);
   }
 
-  private float playOutH(MCTNode node) {
+  private float playOut(MCTNode node) {
     node.addOneToVisits();
     GameState state = node.getGameState().getDuplicate();
     int[][] conBoard = state.getConnectionBoard();
     while (state.getWinner() == 0 || state.isTie()) {
       int[][] movePool = state.getMovePool(conBoard);
-      if (movePool.length == 0) { break; }
+      if (movePool.length == 0) {
+        break;
+      }
       // get two possible moves, choose the one with the greater connection value
       int[] moveOption1 = movePool[int(random(movePool.length))];
       int[] moveOption2 = movePool[int(random(movePool.length))];
@@ -202,46 +189,6 @@ public class GameAI {
       int[] cc = state.getCaptureCount();
       state.playMove(move);
       conBoard = state.getConnectionBoard(conBoard, cc);
-    }
-    float result = (state.getWinner() == node.getGameState().getPlayerOfCurrentTurn()) ? -1 : 1;
-    node.addToValue(result);
-    return result;
-  }
-  
-  private float playOutSemiH(MCTNode node) {
-    node.addOneToVisits();
-    GameState state = node.getGameState().getDuplicate();
-    int[][] conBoard = state.getConnectionBoard();
-    float result = Float.NaN;
-    while (Float.isNaN(result)) {
-      int[][] movePool = state.getMovePool(conBoard);
-      if (movePool.length == 0) {
-        result = 0;
-        break;
-      }
-      int[] move = movePool[int(random(movePool.length))];
-      int[] cc = state.getCaptureCount();
-      state.playMove(move);
-      if (state.someWinConfirmed()) {
-        result = (3 - state.getPlayerOfCurrentTurn() == node.getGameState().getPlayerOfCurrentTurn()) ? -1 : 1;
-      }
-      conBoard = state.getConnectionBoard(conBoard, cc);
-    }
-    node.addToValue(result);
-    return result;
-  }
-
-  private float playOut(MCTNode node) {
-    node.addOneToVisits();
-    GameState state = node.getGameState().getDuplicate();
-    while (state.getWinner() == 0 || state.isTie()) {
-      int[][] movePool = state.getPossibleMoves();
-      if (movePool.length > 0) {
-        int[] move = movePool[int(random(movePool.length))];
-        state.playMove(move);
-      } else {
-        break;
-      }
     }
     float result = (state.getWinner() == node.getGameState().getPlayerOfCurrentTurn()) ? -1 : 1;
     node.addToValue(result);

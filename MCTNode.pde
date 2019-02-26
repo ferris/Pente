@@ -1,3 +1,4 @@
+
 public class MCTNode {
   private static final float epsilon = 1e-6; // used to prevent division by zero
   private MCTNode parent;
@@ -26,25 +27,17 @@ public class MCTNode {
   }
 
   public float getUCBValue(float cParam) {
-    // initialize ucb with small random number to break unexplored node ties in a random fashion
-    float uctValue = random(1) * epsilon;
-    // balance exploration and exploitation by calculating Upper Confidence Bound
-    uctValue += totalValue / (numVisits + epsilon);
+    // balance exploration and exploitation by calculating Upper Confidence Bound    
+    float uctValue = totalValue / (numVisits + epsilon);
     uctValue += cParam * sqrt(2 * log(parent.getTotalVisits() + 1) / (numVisits + epsilon));
     return uctValue;
   }
 
   public float getLCBValue(float cParam) {
-    // initialize ucl with small random number to break unexplored node ties in a random fashion
-    float uctValue = random(1) * epsilon;
     // balance exploration and exploitation by calculating Lower Confidence Bound
-    uctValue += totalValue / (numVisits + epsilon);
-    uctValue -= cParam * sqrt(2 * log(parent.getTotalVisits()) / (numVisits + epsilon));
-    return uctValue;
-  }
-  
-  public float getSCValue() {
-    return (totalValue / (numVisits + epsilon)) + (1 / (sqrt(numVisits) + epsilon));
+    float scValue = totalValue / (numVisits + epsilon);
+    scValue -= cParam * sqrt(2 * log(parent.getTotalVisits()) / (numVisits + epsilon));
+    return scValue;
   }
 
   public GameState getGameState() {
@@ -57,11 +50,6 @@ public class MCTNode {
 
   public MCTNode[] getChildren() {
     return children;
-  }
-
-  public void updateTotals(float totalSimulationChange, float totalValueChange) {
-    numVisits += totalSimulationChange;
-    totalValue += totalValueChange;
   }
 
   public void addOneToVisits() {

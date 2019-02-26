@@ -1,3 +1,4 @@
+
 void mainMenu() {
   noStroke();
   background(26, 188, 156);
@@ -17,7 +18,6 @@ void mainMenu() {
     room = "modeMenu";
   }
 }
-
 
 void modeMenu() {
   noStroke();
@@ -56,7 +56,6 @@ void modeMenu() {
   }
 }
 
-
 void singleMenu() {
   noStroke();
   background(26, 188, 156);
@@ -73,7 +72,6 @@ void singleMenu() {
   text("Easy", 400, 115);
   text("Medium", 400, 315);
   text("Hard", 400, 515);
-
   // BUTTONS
   // easy button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {
@@ -99,7 +97,6 @@ void singleMenu() {
   }
 }
 
-
 void zeroMenu() {
   noStroke();
   background(26, 188, 156);
@@ -116,7 +113,6 @@ void zeroMenu() {
   text("Dumb", 400, 115);
   text("Competent", 400, 315);
   text("Smart", 400, 515);
-
   // BUTTONS
   // dumb button
   if (mouseReleased && mouseX > 200 && mouseX < 600 && mouseY < 150 && mouseY > 50) {

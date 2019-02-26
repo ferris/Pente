@@ -1,15 +1,11 @@
 import java.lang.Runtime;
 
 class Game {
-  private GameState gameState;
-  //private String mode; // game mode chosen through menu
+  private GameState gameState; // the GameState of the current board
   private boolean winDelay = false; // prevents accidental return to menu
   private boolean moveDelay = false; // allows a frame to be drawn before move chosen
   private char[] playerTypes;
   
-  // debug purposes
-  MCTNode sc;
-  // debug end
   public Game(String mode, int startingPlayer) {
     this.gameState = new GameState(startingPlayer);
     //this.mode = mode;
@@ -37,20 +33,11 @@ class Game {
           move = new int[] {hmc[1], hmc[2]};
           newMove = hmc[0] == 1;
         } else if (playerTypes[gameState.getPlayerOfCurrentTurn() - 1] == 'c') {
-          println();
-          println("computer is thinking");
-          long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-          sc = ai.getComputerMove(gameState);
-          move = sc.getGameState().getPreviousMove();
-          //move = ai.getComputerMove(gameState);
-          long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-          //println("memory_before: " + str(memoryBefore/1048576) + "MiB");
-          //println("memory_after: " + str(memoryAfter/1048576) + "MiB");
-          //println("memory_change: " + str((memoryAfter-memoryBefore)/1048576) + "MiB");
+          move = ai.getComputerMove(gameState);
           newMove = true;
         }
       } else {
-        moveDelay = true; //<>//
+        moveDelay = true;
       }
       if (newMove) {
         moveDelay = false;
@@ -81,7 +68,6 @@ class Game {
   public boolean gameIsOver() {
     return gameState.getWinner() != 0;
   }
-
 
   // FRONT END METHODS
   public void drawBoard() {

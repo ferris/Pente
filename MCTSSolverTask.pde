@@ -1,3 +1,4 @@
+
 public static class MCTSSolverTask implements Callable<Float> {
   public static GameAI parentAI;
   public static MCTNode treeRoot;

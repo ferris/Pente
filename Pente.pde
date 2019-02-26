@@ -1,27 +1,27 @@
 /*
- _______                        __               
-/       \                      /  |              
-$$$$$$$  | ______   _______   _$$ |_     ______  
-$$ |__$$ |/      \ /       \ / $$   |   /      \ 
-$$    $$//$$$$$$  |$$$$$$$  |$$$$$$/   /$$$$$$  |
-$$$$$$$/ $$    $$ |$$ |  $$ |  $$ | __ $$    $$ |
-$$ |     $$$$$$$$/ $$ |  $$ |  $$ |/  |$$$$$$$$/ 
-$$ |     $$       |$$ |  $$ |  $$  $$/ $$       |
-$$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
+  ._______                        __               
+  /       \                      /  |              
+  $$$$$$$  | ______   _______   _$$ |_     ______  
+  $$ |__$$ |/      \ /       \ / $$   |   /      \ 
+  $$    $$//$$$$$$  |$$$$$$$  |$$$$$$/   /$$$$$$  |
+  $$$$$$$/ $$    $$ |$$ |  $$ |  $$ | __ $$    $$ |
+  $$ |     $$$$$$$$/ $$ |  $$ |  $$ |/  |$$$$$$$$/ 
+  $$ |     $$       |$$ |  $$ |  $$  $$/ $$       |
+  $$/       $$$$$$$/ $$/   $$/    $$$$/   $$$$$$$/
 
 */
 
 /*
-  Pente Development Code
-  Written by Ferris Linde
+  Processing Pente Code
+  Created by Ferris Linde
 */
 
 /*
-REFERENCES:
-- https://medium.com/@quasimik/monte-carlo-tree-search-applied-to-letterpress-34f41c86e238
-- https://www.baeldung.com/java-monte-carlo-tree-search
-- http://mcts.ai/pubs/mcts-survey-master.pdf
-- https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
+  REFERENCES:
+    - https://medium.com/@quasimik/monte-carlo-tree-search-applied-to-letterpress-34f41c86e238
+    - https://www.baeldung.com/java-monte-carlo-tree-search
+    - http://mcts.ai/pubs/mcts-survey-master.pdf
+    - https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
 */
 
 String version = "Monte Carlo Tree Solver";

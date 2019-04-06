@@ -365,7 +365,7 @@ class GameState {
     return connectionBoard;
   }
 
-  int[][] getConnectionBoard(int[][] prevConnectionBoard, int[] prevCaptures) {
+  public int[][] getConnectionBoard(int[][] prevConnectionBoard, int[] prevCaptures) {
     // for simulations: get current state's connection board from previous by looking at prevMove
     // if this is the first move or the previous move was a capture move, we have to recalculate
     if (prevMove == null || prevCaptures[0] != captures[0] || prevCaptures[1] != captures[1]) {
